@@ -11,4 +11,4 @@ class ReviewSubmission(SQLModel, table=True):
     user_id: int = Field(foreign_key="users.id", unique=True)
     project_link: str = Field(max_length=500)
     review_text: str = Field(max_length=2000)
-    submitted_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    submitted_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc).replace(tzinfo=None))

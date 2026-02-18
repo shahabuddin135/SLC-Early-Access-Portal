@@ -9,5 +9,5 @@ class DownloadEvent(SQLModel, table=True):
 
     id: Optional[int] = Field(default=None, primary_key=True)
     user_id: int = Field(foreign_key="users.id")
-    downloaded_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    downloaded_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc).replace(tzinfo=None))
     ip_address: Optional[str] = Field(default=None, max_length=45)
