@@ -16,6 +16,7 @@ export interface User {
 export interface DashboardData extends User {
   github_id: string;
   has_downloaded: boolean;
+  has_agreed_terms: boolean;
 }
 
 export interface TokenResponse {
@@ -118,6 +119,25 @@ export async function triggerDownload(
         cache: "no-store",
       }
     );
+
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
+}
+
+// ── Terms ─────────────────────────────────────────────────────────────────────
+
+export async function agreeToTerms(
+  token: string
+): Promise<{ agreed: boolean } | null> {
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/v1/terms/agree`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
 
     if (!res.ok) return null;
     return res.json();

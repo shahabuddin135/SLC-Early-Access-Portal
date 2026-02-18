@@ -1,3 +1,4 @@
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlmodel import SQLModel
 
@@ -29,3 +30,7 @@ async def get_session():
 async def create_db_and_tables():
     async with engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.create_all)
+        # Idempotent migration — adds column to existing tables without data loss
+        await conn.execute(
+            text("ALTER TABLE users ADD COLUMN IF NOT EXISTS terms_agreed_at TIMESTAMP")
+        )

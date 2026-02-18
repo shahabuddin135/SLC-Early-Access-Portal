@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { downloadAction } from "@/app/actions/download";
+import DownloadWarningDialog from "@/components/DownloadWarningDialog";
 
-type ViewState = "idle" | "enter_key" | "loading" | "done";
+type ViewState = "idle" | "warning" | "enter_key" | "loading" | "done";
 
 interface DownloadSectionProps {
   hasDownloaded: boolean;
@@ -29,7 +30,7 @@ export default function DownloadSection({
     try {
       const result = await downloadAction(key.trim());
       if (result.ok) {
-        // Open the file route in a new tab  auth cookie + key are both validated server-side
+        // Open the file route in a new tab — auth cookie + key both validated server-side
         window.open(
           `/api/download/file?key=${encodeURIComponent(key.trim())}`,
           "_blank",
@@ -48,6 +49,16 @@ export default function DownloadSection({
     }
   }
 
+  /*  Warning dialog — shown before key entry  */
+  if (view === "warning") {
+    return (
+      <DownloadWarningDialog
+        onConfirm={() => setView("enter_key")}
+        onCancel={() => setView("idle")}
+      />
+    );
+  }
+
   /*  Downloaded state  */
   if (view === "done") {
     return (
@@ -58,7 +69,7 @@ export default function DownloadSection({
             &#10003; Downloaded
           </div>
           <button
-            onClick={() => { setKey(""); setError(null); setView("enter_key"); }}
+            onClick={() => { setKey(""); setError(null); setView("warning"); }}
             className="btn-secondary"
             style={{ width: "auto", alignSelf: "flex-start" }}
           >
@@ -76,10 +87,12 @@ export default function DownloadSection({
         <h3 style={{ marginBottom: 8 }}>SLC Language &amp; Framework</h3>
         <p style={{ fontSize: "0.875rem", marginBottom: 20 }}>
           Download the SLC framework package to get started.
-          A download key is required.
+          A download key is required — contact{" "}
+          <a href="mailto:wewiselabs@gmail.com">wewiselabs@gmail.com</a>{" "}
+          to obtain yours.
         </p>
         <button
-          onClick={() => setView("enter_key")}
+          onClick={() => setView("warning")}
           className="btn-primary"
         >
           Download SLC Language &amp; Framework
@@ -102,10 +115,9 @@ export default function DownloadSection({
           marginBottom: 20,
         }}
       >
-        Don&apos;t have a key?{" "}
-        <span style={{ color: "var(--color-primary)" }}>
-          Contact the portal creator to obtain your download key.
-        </span>
+        Don&apos;t have a key? Contact{" "}
+        <a href="mailto:wewiselabs@gmail.com">wewiselabs@gmail.com</a>{" "}
+        to obtain your download key.
       </p>
 
       <div className="field" style={{ marginBottom: 20 }}>

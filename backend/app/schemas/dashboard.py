@@ -7,6 +7,7 @@ class DashboardResponse(BaseModel):
     email: str
     github_id: str
     has_downloaded: bool
+    has_agreed_terms: bool
 
 
 class DownloadResponse(BaseModel):

@@ -15,4 +15,5 @@ async def get_dashboard(current_user: User = Depends(get_current_user)):
         email=current_user.email,
         github_id=current_user.github_id,
         has_downloaded=current_user.has_downloaded,
+        has_agreed_terms=current_user.terms_agreed_at is not None,
     )
