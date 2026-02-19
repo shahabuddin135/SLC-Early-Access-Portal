@@ -25,8 +25,9 @@ content:
       framework: "FastAPI"
       language: "Python 3.12+"
       orm: "SQLModel"
-      auth: "JWT via python-jose + passlib[bcrypt]"
-      hosting: "Vercel (serverless functions)"
+      auth: "JWT via python-jose + direct bcrypt (no passlib)"
+      hosting: "Railway / Render / Fly.io (standard ASGI — NOT Vercel serverless)"
+      file_storage: "Supabase Storage (private bucket) — accessed via SUPABASE_SERVICE_KEY"
 
     database:
       provider: "Neon PostgreSQL"
@@ -49,5 +50,10 @@ content:
     - "No secrets in frontend code or environment variables exposed to client"
     - "All API calls from frontend must go through Next.js API routes or server actions"
     - "No third-party auth providers (no OAuth, no Auth0) for v1"
+    - "DOWNLOAD_FILE_URL and SUPABASE_SERVICE_KEY are backend-only env vars — never set on Vercel"
+    - "Admin access is enforced by TWO guards: get_admin_user dependency (backend) + SSR email check (frontend)"
+    - "Download keys are single-use — never regenerate or reuse after redemption"
+    - "Download tokens are single-use UUID, 60s TTL — never extend or bypass"
+    - "All datetime columns use TIMESTAMP WITHOUT TIME ZONE — strip tzinfo before writes with .replace(tzinfo=None)"
 @end
 ```

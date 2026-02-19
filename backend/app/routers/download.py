@@ -41,9 +41,12 @@ async def download_file(
         raise HTTPException(status_code=503, detail="Download file not configured.")
 
     if url.startswith(("http://", "https://")):
-        # Fetch from internal/static URL (e.g. Vercel public path with obscured name)
+        # Fetch from internal/static URL — attach service key for private Supabase Storage
+        headers = {}
+        if settings.SUPABASE_SERVICE_KEY:
+            headers["Authorization"] = f"Bearer {settings.SUPABASE_SERVICE_KEY}"
         async with httpx.AsyncClient(timeout=30) as client:
-            file_resp = await client.get(url)
+            file_resp = await client.get(url, headers=headers)
             if file_resp.status_code != 200:
                 raise HTTPException(status_code=503, detail="File temporarily unavailable.")
         return Response(

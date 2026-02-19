@@ -80,29 +80,116 @@ content:
         200:
           description: "Dashboard data"
           schema:
-            id:             { type: int }
-            name:           { type: string }
-            email:          { type: string }
-            github_id:      { type: string }
-            has_downloaded: { type: bool }
+            id:               { type: int }
+            name:             { type: string }
+            email:            { type: string }
+            github_id:        { type: string }
+            has_downloaded:   { type: bool }
+            has_agreed_terms: { type: bool, derived: "terms_agreed_at != null" }
+        401:
+          description: "Missing or invalid token"
+
+    - id: "TERMS-01"
+      method: POST
+      path: "/terms/agree"
+      auth_required: true
+      description: "Record that user has agreed to WeWise Labs NDA/Terms"
+      request_headers:
+        Authorization: "Bearer <token>"
+      responses:
+        200:
+          description: "Agreement recorded"
+          schema:
+            agreed:           { type: bool, value: true }
+            terms_agreed_at:  { type: timestamp }
+        401:
+          description: "Missing or invalid token"
+
+    - id: "REDEEM-01"
+      method: POST
+      path: "/redeem"
+      auth_required: true
+      description: "Redeem a one-time download key — returns a single-use 60s download token"
+      request_headers:
+        Authorization: "Bearer <token>"
+      request_body:
+        content_type: "application/json"
+        schema:
+          key_value: { type: string, required: true, pattern: "XXXX-XXXX-XXXX-XXXX" }
+      responses:
+        200:
+          description: "Key redeemed — download token returned"
+          schema:
+            download_token: { type: string, format: uuid }
+        400:
+          description: "Invalid or already used key"
+          schema:
+            detail: { type: string }
         401:
           description: "Missing or invalid token"
 
     - id: "DL-01"
       method: GET
       path: "/download"
-      auth_required: true
-      description: "Trigger download — records event and returns download URL"
-      request_headers:
-        Authorization: "Bearer <token>"
+      auth_required: false
+      description: "Validate single-use token and stream ZIP from private Supabase Storage. Token IS the credential."
+      query_params:
+        token: { type: string, required: true, format: uuid }
       responses:
         200:
-          description: "Download URL returned"
+          description: "ZIP file streamed as application/zip"
+          headers:
+            Content-Disposition: 'attachment; filename="slc-framework.zip"'
+            Cache-Control: "no-store, no-cache, must-revalidate"
+            X-Content-Type-Options: "nosniff"
+        410:
+          description: "Token already used, expired (>60s), or not found"
           schema:
-            download_url:   { type: string, format: uri }
-            has_downloaded: { type: bool, value: true }
-        401:
-          description: "Missing or invalid token"
+            detail: { type: string }
+        503:
+          description: "DOWNLOAD_FILE_URL not configured or Supabase unreachable"
+
+    - id: "ADMIN-01"
+      method: GET
+      path: "/admin/keys"
+      auth_required: true
+      admin_required: true
+      description: "List all download keys with stats (admin only)"
+      request_headers:
+        Authorization: "Bearer <admin token>"
+      responses:
+        200:
+          description: "Keys list with aggregate stats"
+          schema:
+            total:  { type: int }
+            used:   { type: int }
+            unused: { type: int }
+            keys:   { type: array, items: KeyOut }
+        403:
+          description: "User is not an admin"
+
+    - id: "ADMIN-02"
+      method: POST
+      path: "/admin/keys/generate"
+      auth_required: true
+      admin_required: true
+      description: "Generate 1–100 new one-time download keys (admin only)"
+      request_headers:
+        Authorization: "Bearer <admin token>"
+      request_body:
+        content_type: "application/json"
+        schema:
+          count: { type: int, required: true, min: 1, max: 100 }
+      responses:
+        201:
+          description: "Keys generated"
+          schema:
+            type: array
+            items: KeyOut
+        403:
+          description: "User is not an admin"
+        422:
+          description: "count out of range"
 
     - id: "REV-01"
       method: POST

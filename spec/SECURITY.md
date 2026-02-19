@@ -16,7 +16,7 @@ depends_on: none
 content:
   backend_rules:
     passwords:
-      - "Hash all passwords with bcrypt (passlib[bcrypt]) before storing"
+      - "Hash all passwords with direct bcrypt (bcrypt.hashpw/checkpw) — passlib is NOT used"
       - "Never log, return, or expose raw passwords"
       - "Minimum password length: 8 characters (enforced at API level)"
 
@@ -37,9 +37,21 @@ content:
       - "Rate limit POST /auth/login: 10 requests per IP per minute"
       - "Use slowapi or equivalent FastAPI-compatible rate limiter"
 
+    download_keys:
+      - "Keys are single-use — redemption atomically marks key as used via SELECT FOR UPDATE"
+      - "Download tokens are single-use UUID v4 with 60-second TTL — validated and consumed atomically"
+      - "DOWNLOAD_FILE_URL is a server-only env var — never sent to client under any circumstances"
+      - "SUPABASE_SERVICE_KEY is a server-only env var — never set in frontend env or NEXT_PUBLIC_ prefix"
+      - "File is served exclusively through FastAPI — browser never receives a direct storage URL"
+
+    admin:
+      - "Admin access is double-enforced: get_admin_user FastAPI dependency on all /admin/* routes + SSR email guard in Next.js"
+      - "Admin emails are hardcoded in app/constants.py frozenset — not stored in DB, not user-settable"
+      - "Non-admin users receive 403 on all /api/v1/admin/* endpoints"
+
     general:
       - "Validate all input with Pydantic models — reject unknown fields"
-      - "Set CORS to allow only the frontend Vercel domain in production"
+      - "Set CORS to allow only the frontend domain in production"
       - "Never return stack traces or internal errors to the client"
       - "Use HTTPS only — no HTTP in production"
 

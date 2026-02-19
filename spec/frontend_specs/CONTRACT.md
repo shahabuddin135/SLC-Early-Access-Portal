@@ -60,17 +60,63 @@ content:
       on_error_401:
         - "Redirect to /login"
 
-    - backend_ref: "DL-01"
-      path: "GET /download"
-      called_from: "DownloadSection server action"
+    - backend_ref: "TERMS-01"
+      path: "POST /terms/agree"
+      called_from: "TermsAgreementModal → agreeToTermsAction() server action"
       sends:
         Authorization: "Bearer <token from cookie>"
       on_success_200:
-        - "Trigger file download via download_url"
-        - "Set has_downloaded = true in local state"
-        - "Show ReviewForm"
+        - "Call router.refresh() — re-runs SSR, modal disappears"
       on_error_401:
         - "Redirect to /login"
+
+    - backend_ref: "REDEEM-01"
+      path: "POST /redeem"
+      called_from: "downloadAction(keyValue) server action"
+      sends:
+        Authorization: "Bearer <token from cookie>"
+        key_value: string
+      on_success_200:
+        - "Return {ok: true, downloadToken: uuid} to DownloadSection"
+        - "Browser opens /api/download/file?token=<uuid>"
+      on_error_400:
+        - "Show: 'Invalid or already used key'"
+      on_error_401:
+        - "Redirect to /login"
+
+    - backend_ref: "DL-01"
+      path: "GET /download?token=<uuid>"
+      called_from: "Next.js API route /api/download/file (proxy)"
+      flow:
+        - "Browser opens /api/download/file?token=<uuid>"
+        - "Next.js API route validates auth cookie (redirects to /login if missing)"
+        - "Next.js proxies GET /api/v1/download?token=<uuid> to FastAPI"
+        - "FastAPI validates/expires token, streams ZIP"
+        - "Next.js pipes stream back to browser"
+      on_error_410:
+        - "Show: 'Download link expired or already used. Please try again.'"
+
+    - backend_ref: "ADMIN-01"
+      path: "GET /admin/keys"
+      called_from: "admin/page.tsx (SSR) + listKeysAction() for refresh"
+      sends:
+        Authorization: "Bearer <admin token from cookie>"
+      on_success_200:
+        - "Pass keys data to AdminDashboard component"
+      on_error_403:
+        - "Redirect to /dashboard"
+
+    - backend_ref: "ADMIN-02"
+      path: "POST /admin/keys/generate"
+      called_from: "AdminDashboard → generateKeysAction(count) server action"
+      sends:
+        Authorization: "Bearer <admin token from cookie>"
+        count: int
+      on_success_201:
+        - "Refresh key list in AdminDashboard"
+        - "Show newly generated keys in table"
+      on_error_422:
+        - "Show: 'Count must be between 1 and 100'"
 
     - backend_ref: "REV-01"
       path: "POST /review"

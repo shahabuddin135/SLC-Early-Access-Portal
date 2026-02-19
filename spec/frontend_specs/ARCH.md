@@ -18,17 +18,21 @@ content:
     auth:
       token: { type: string, storage: "httpOnly cookie", managed_by: "Next.js server action" }
       user:
-        id:             { type: int | null }
-        name:           { type: string | null }
-        email:          { type: string | null }
-        github_id:      { type: string | null }
-        has_downloaded: { type: bool, default: false }
+        id:               { type: int | null }
+        name:             { type: string | null }
+        email:            { type: string | null }
+        github_id:        { type: string | null }
+        has_downloaded:   { type: bool, default: false }
+        has_agreed_terms: { type: bool, default: false }
       is_authenticated: { type: bool, derived: "token != null" }
+      is_admin:         { type: bool, derived: "user.email in ADMIN_EMAILS set" }
 
     ui:
       loading:        { type: bool }
       error:          { type: string | null }
       review_visible: { type: bool, derived: "user.has_downloaded == true" }
+      terms_required: { type: bool, derived: "user.has_agreed_terms == false" }
+      download_state: { type: enum, values: [idle, warning, enter_key, loading, done] }
 @end
 
 @block ARCH ui_flow
@@ -54,20 +58,33 @@ content:
       auth_required: true
       redirect_if_unauthed: "/login"
 
+    - path: "/admin"
+      page: "Admin Dashboard"
+      auth_required: true
+      admin_required: true
+      guard: "SSR checks email against ADMIN_EMAILS Set — redirects non-admins to /dashboard"
+
   flow:
     - "User lands on / → sees Register form"
     - "After register → redirected to /login"
     - "After login → redirected to /dashboard"
-    - "Dashboard shows: profile header, download button"
-    - "After clicking download → file downloads, review form appears"
-    - "User fills review form and submits"
+    - "If has_agreed_terms == false → TermsAgreementModal blocks entire dashboard"
+    - "After agreeing → dashboard visible: profile header, download section"
+    - "User clicks Download → DownloadWarningDialog (5 obligations)"
+    - "After acknowledging warning → key entry field appears"
+    - "User enters key → redeemKey() → downloadToken → browser opens /api/download/file?token=uuid"
+    - "After download → review form appears"
+    - "Admin navigates to /admin → sees key stats, generates keys, copies keys"
 
   components:
-    - RegisterForm:     "Name, email, GitHub ID, password fields + submit"
-    - LoginForm:        "Email, password fields + submit"
-    - ProfileHeader:    "Shows user name, email, GitHub ID"
-    - DownloadSection:  "Download button + status indicator"
-    - ReviewForm:       "Project link + review text + submit (visible after download)"
+    - RegisterForm:           "Name, email, GitHub ID, password fields + submit"
+    - LoginForm:              "Email, password fields + submit"
+    - ProfileHeader:          "Shows user name, email, GitHub ID + WeWise Labs badge"
+    - DownloadSection:        "States: idle → warning → enter_key → loading → done"
+    - ReviewForm:             "Project link + review text + submit (visible after download)"
+    - TermsAgreementModal:    "Full-screen blocking modal with WeWise Labs NDA — agree or logout"
+    - DownloadWarningDialog:  "Pre-download confidentiality acknowledgment (5 obligations)"
+    - AdminDashboard:         "Stats bar, filter tabs (All/Unused/Used), key table with copy buttons, generate modal"
 @end
 
 @block ARCH rendering_strategy
@@ -132,22 +149,37 @@ content:
       tsconfig.json:        "TypeScript config"
       .env.local:           "BACKEND_URL (server-side only)"
       app/:
-        layout.tsx:         "Root layout — Geist font, global CSS"
-        page.tsx:           "/ — Register page"
+        layout.tsx:              "Root layout — Geist font, global CSS"
+        globals.css:             "Design tokens, resets, base styles, modal/admin styles"
+        page.tsx:                "/ — Register page"
         login/
-          page.tsx:         "/login — Login page"
+          page.tsx:              "/login — Login page"
         dashboard/
-          page.tsx:         "/dashboard — Dashboard (SSR)"
+          page.tsx:              "/dashboard — Dashboard (SSR) — renders TermsAgreementModal if !has_agreed_terms"
+        admin/
+          page.tsx:              "/admin — Admin dashboard (SSR) — SSR email guard → AdminDashboard"
+        actions/
+          auth.ts:               "registerAction, loginAction, logoutAction server actions"
+          download.ts:           "downloadAction(keyValue) → calls redeemKey → returns downloadToken"
+          terms.ts:              "agreeToTermsAction() → calls POST /terms/agree"
+          admin.ts:              "listKeysAction(), generateKeysAction(count)"
+        api/
+          download/
+            file/
+              route.ts:          "GET proxy: validates cookie, proxies GET /api/v1/download?token= to FastAPI, streams response"
       components/:
-        RegisterForm.tsx:   "Register form component"
-        LoginForm.tsx:      "Login form component"
-        ProfileHeader.tsx:  "User profile header"
-        DownloadSection.tsx: "Download button + status"
-        ReviewForm.tsx:     "Review submission form"
+        RegisterForm.tsx:        "Register form component"
+        LoginForm.tsx:           "Login form component"
+        ProfileHeader.tsx:       "User profile header + WeWise Labs badge"
+        DownloadSection.tsx:     "States: idle → warning → enter_key → loading → done"
+        ReviewForm.tsx:          "Review submission form"
+        TermsAgreementModal.tsx: "Full-screen NDA modal — agree/disagree"
+        DownloadWarningDialog.tsx: "5-obligation confidentiality dialog before key entry"
+        AdminDashboard.tsx:      "Full admin UI: stats, filter tabs, key table, generate modal"
       lib/:
-        api.ts:             "API call helpers (server-side)"
-        auth.ts:            "Cookie helpers, token management"
-      styles/:
-        globals.css:        "Design tokens, resets, base styles"
+        api.ts:   "All API call helpers: auth, dashboard, redeemKey, agreeToTerms, listAdminKeys, generateAdminKeys"
+        auth.ts:  "Cookie helpers, token management"
+      files/:
+        slc-framework.zip: "(dev placeholder only — production uses Supabase Storage)"
 @end
 ```
