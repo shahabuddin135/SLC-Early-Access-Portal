@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.constants import ADMIN_EMAILS
+from app.core.config import settings
 from app.core.database import get_session
 from app.dependencies.admin import get_admin_user
 from app.models.key import Key
@@ -78,4 +78,4 @@ async def create_keys(
 @router.get("/who")
 async def who_are_admins(_admin: User = Depends(get_admin_user)):
     """Dev helper — returns the list of admin emails (still admin-gated)."""
-    return {"admin_emails": sorted(ADMIN_EMAILS)}
+    return {"admin_emails": sorted(settings.admin_emails_set)}
