@@ -7,6 +7,8 @@ from app.core.config import settings
 # All models must be imported here so SQLModel.metadata knows about them
 # before create_db_and_tables() calls create_all()
 from app.models.download import DownloadEvent  # noqa: F401
+from app.models.download_token import DownloadToken  # noqa: F401
+from app.models.key import Key  # noqa: F401
 from app.models.review import ReviewSubmission  # noqa: F401
 from app.models.user import User  # noqa: F401
 
@@ -30,7 +32,7 @@ async def get_session():
 async def create_db_and_tables():
     async with engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.create_all)
-        # Idempotent migration — adds column to existing tables without data loss
+        # Idempotent migrations — safe to run on every startup
         await conn.execute(
             text("ALTER TABLE users ADD COLUMN IF NOT EXISTS terms_agreed_at TIMESTAMP")
         )

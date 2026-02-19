@@ -1,47 +1,55 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createHash, timingSafeEqual } from "crypto";
-import { readFile } from "fs/promises";
-import path from "path";
 import { getAuthToken } from "@/lib/auth";
 
-function validateKey(userKey: string): boolean {
-  const expected = process.env.DOWNLOAD_KEY ?? "";
-  if (!expected) return false;
-  // Constant-time comparison via SHA-256 hashing
-  const a = createHash("sha256").update(userKey).digest();
-  const b = createHash("sha256").update(expected).digest();
-  return timingSafeEqual(a, b);
-}
+const BACKEND_URL = process.env.BACKEND_URL ?? "http://localhost:8000";
 
+/**
+ * Proxy route — requires:
+ *  1. Valid slc_token httpOnly cookie (user is authenticated)
+ *  2. Valid single-use download token from /api/v1/redeem (60s TTL)
+ *
+ * The real file URL is NEVER sent to the client. It lives only in
+ * DOWNLOAD_FILE_URL on the FastAPI server.
+ */
 export async function GET(req: NextRequest) {
-  // 1. Validate auth cookie — user must be logged in
-  const token = await getAuthToken();
-  if (!token) {
+  // 1. Auth check
+  const authToken = await getAuthToken();
+  if (!authToken) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
-  // 2. Validate download key — prevents unauthenticated file access
-  const key = req.nextUrl.searchParams.get("key") ?? "";
-  if (!validateKey(key)) {
-    return new NextResponse("Forbidden: invalid download key", { status: 403 });
+  // 2. Download token
+  const downloadToken = req.nextUrl.searchParams.get("token");
+  if (!downloadToken) {
+    return new NextResponse("Missing download token", { status: 400 });
   }
 
-  // 3. Stream the file — only reachable with valid auth + valid key
+  // 3. Proxy to FastAPI — which validates token + streams the file
   try {
-    // Path is relative to project root (outside public/ — never statically served)
-    const filePath = path.join(process.cwd(), "files", "slc-framework.zip");
-    const fileBuffer = await readFile(filePath);
+    const backendRes = await fetch(
+      `${BACKEND_URL}/api/v1/download?token=${encodeURIComponent(downloadToken)}`,
+      { cache: "no-store" }
+    );
 
-    return new NextResponse(fileBuffer, {
+    if (!backendRes.ok) {
+      const msg =
+        backendRes.status === 403
+          ? "Download token expired or already used."
+          : "File download failed.";
+      return new NextResponse(msg, { status: backendRes.status });
+    }
+
+    // Pipe stream directly to client
+    return new NextResponse(backendRes.body, {
       headers: {
         "Content-Type": "application/zip",
         "Content-Disposition": 'attachment; filename="slc-framework.zip"',
-        "Content-Length": fileBuffer.byteLength.toString(),
         "Cache-Control": "no-store, no-cache, must-revalidate",
         "X-Content-Type-Options": "nosniff",
       },
     });
   } catch {
-    return new NextResponse("File not found", { status: 404 });
+    return new NextResponse("Internal error during download", { status: 500 });
   }
 }
+

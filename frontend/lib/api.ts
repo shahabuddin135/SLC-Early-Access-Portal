@@ -105,21 +105,77 @@ export async function getDashboard(
   }
 }
 
-// ── Download ──────────────────────────────────────────────────────────────────
+// ── Download / Redeem ─────────────────────────────────────────────────────────
 
-export async function triggerDownload(
+export async function redeemKey(
   token: string,
-  key: string
-): Promise<{ has_downloaded: boolean } | null> {
+  keyValue: string
+): Promise<{ download_token: string } | null> {
   try {
-    const res = await fetch(
-      `${BACKEND_URL}/api/v1/download?key=${encodeURIComponent(key)}`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-        cache: "no-store",
-      }
-    );
+    const res = await fetch(`${BACKEND_URL}/api/v1/redeem`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ key_value: keyValue }),
+      cache: "no-store",
+    });
 
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
+}
+
+// ── Admin ─────────────────────────────────────────────────────────────────────
+
+export interface DownloadKey {
+  id: number;
+  key_value: string;
+  used: boolean;
+  created_at: string;
+  used_at: string | null;
+  used_by: string | null;
+}
+
+export interface KeysResponse {
+  keys: DownloadKey[];
+  total: number;
+  used: number;
+  unused: number;
+}
+
+export async function listAdminKeys(
+  token: string
+): Promise<KeysResponse | null> {
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/v1/admin/keys`, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
+}
+
+export async function generateAdminKeys(
+  token: string,
+  count: number
+): Promise<DownloadKey[] | null> {
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/v1/admin/keys/generate`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ count }),
+      cache: "no-store",
+    });
     if (!res.ok) return null;
     return res.json();
   } catch {

@@ -258,3 +258,173 @@ textarea.input { resize: vertical; min-height: 120px; line-height: 1.5; }
   background: rgba(239, 68, 68, 0.08);
   border-color: var(--color-error);
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Admin Dashboard
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/*  Stats bar  */
+.admin-stats-bar {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.admin-stat-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  text-align: center;
+}
+
+.admin-stat-label {
+  font-size: 0.75rem;
+  color: var(--color-muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 6px;
+}
+
+.admin-stat-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+/*  Filter tabs  */
+.admin-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 0;
+}
+
+.admin-tab {
+  padding: 8px 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-muted);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color 0.15s ease, border-color 0.15s ease;
+  margin-bottom: -1px;
+}
+
+.admin-tab:hover { color: var(--color-text); }
+.admin-tab.active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+/*  Table wrapper  */
+.admin-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+
+.admin-table th {
+  background: #0D0D0D;
+  color: var(--color-muted);
+  font-weight: 600;
+  text-align: left;
+  padding: 10px 14px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+.admin-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(34,34,34,0.6);
+  color: var(--color-text-muted);
+  vertical-align: middle;
+}
+
+.admin-table tr:last-child td { border-bottom: none; }
+.admin-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+/*  Key value cell  */
+.key-value-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.key-mono {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  color: var(--color-text);
+  letter-spacing: 0.04em;
+}
+
+/*  Status badge  */
+.key-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.key-badge.unused {
+  background: rgba(34, 197, 94, 0.1);
+  color: var(--color-success);
+  border: 1px solid rgba(34, 197, 94, 0.25);
+}
+
+.key-badge.used {
+  background: rgba(107, 114, 128, 0.12);
+  color: var(--color-muted);
+  border: 1px solid rgba(107, 114, 128, 0.2);
+}
+
+/*  Copy button  */
+.copy-btn {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-muted);
+  padding: 3px 8px;
+  border-radius: var(--radius);
+  font-size: 0.6875rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+.copy-btn:hover { border-color: var(--color-muted); color: var(--color-text); }
+.copy-btn.copied { border-color: var(--color-success); color: var(--color-success); }
+
+/*  Generate modal (reuses dialog-overlay / dialog-card)  */
+.gen-count-input {
+  width: 100%;
+  background: #1A1A1A;
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: 1rem;
+  text-align: center;
+  margin: 12px 0 20px;
+  transition: border-color 0.15s;
+}
+.gen-count-input:focus { border-color: var(--color-primary); outline: none; }

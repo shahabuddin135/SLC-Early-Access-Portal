@@ -30,9 +30,10 @@ export default function DownloadSection({
     try {
       const result = await downloadAction(key.trim());
       if (result.ok) {
-        // Open the file route in a new tab — auth cookie + key both validated server-side
+        // Open the proxy route in a new tab — auth + token both validated server-side.
+        // The 60-second token window is generous; the new tab opens immediately.
         window.open(
-          `/api/download/file?key=${encodeURIComponent(key.trim())}`,
+          `/api/download/file?token=${encodeURIComponent(result.downloadToken)}`,
           "_blank",
           "noopener,noreferrer"
         );
