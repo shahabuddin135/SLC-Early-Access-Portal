@@ -6,6 +6,11 @@ import DownloadSection from "@/components/DownloadSection";
 import ReviewForm from "@/components/ReviewForm";
 import TermsAgreementModal from "@/components/TermsAgreementModal";
 
+function getAdminEmails(): Set<string> {
+  const raw = process.env.ADMIN_EMAILS ?? "";
+  return new Set(raw.split(",").map((e) => e.trim().toLowerCase()).filter(Boolean));
+}
+
 export default async function DashboardPage() {
   const token = await getAuthToken();
 
@@ -18,6 +23,8 @@ export default async function DashboardPage() {
   if (!data) {
     redirect("/login");
   }
+
+  const isAdmin = getAdminEmails().has(data.email.toLowerCase());
 
   return (
     <div className="page-center" style={{ justifyContent: "flex-start", paddingTop: 48 }}>
@@ -32,7 +39,7 @@ export default async function DashboardPage() {
           <span className="ww-badge" style={{ fontSize: "0.6875rem" }}>WeWise Labs</span>
         </div>
 
-        <ProfileHeader user={data} />
+        <ProfileHeader user={data} isAdmin={isAdmin} />
 
         <DownloadSection hasDownloaded={data.has_downloaded} />
 

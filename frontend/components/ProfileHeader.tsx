@@ -5,9 +5,10 @@ import type { DashboardData } from "@/lib/api";
 
 interface ProfileHeaderProps {
   user: DashboardData;
+  isAdmin?: boolean;
 }
 
-export default function ProfileHeader({ user }: ProfileHeaderProps) {
+export default function ProfileHeader({ user, isAdmin }: ProfileHeaderProps) {
   const router = useRouter();
 
   async function handleLogout() {
@@ -39,13 +40,24 @@ export default function ProfileHeader({ user }: ProfileHeaderProps) {
             github.com/{user.github_id}
           </p>
         </div>
-        <button
-          onClick={handleLogout}
-          className="btn-secondary"
-          style={{ flexShrink: 0, width: "auto" }}
-        >
-          Log out
-        </button>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8, alignItems: "flex-end", flexShrink: 0 }}>
+          {isAdmin && (
+            <button
+              onClick={() => router.push("/admin")}
+              className="btn-primary"
+              style={{ width: "auto", fontSize: "0.8125rem", padding: "6px 14px" }}
+            >
+              ⚙ Admin Panel
+            </button>
+          )}
+          <button
+            onClick={handleLogout}
+            className="btn-secondary"
+            style={{ width: "auto" }}
+          >
+            Log out
+          </button>
+        </div>
       </div>
     </div>
   );
