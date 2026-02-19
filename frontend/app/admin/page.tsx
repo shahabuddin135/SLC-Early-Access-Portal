@@ -3,14 +3,11 @@ import { getAuthToken } from "@/lib/auth";
 import { getDashboard, listAdminKeys } from "@/lib/api";
 import AdminDashboard from "@/components/AdminDashboard";
 
-// Admin emails — must match the backend constants.py list
-const ADMIN_EMAILS = new Set([
-  "voyagersvrs135@gmail.com",
-  "aleemabeera@gmail.com",
-  "sarfarazsaba11@gmail.com",
-  "darakhshanimranid@gmail.com",
-  "myscienceworld135@gmail.com",
-]);
+// Admin emails — loaded from ADMIN_EMAILS env var (server-side only, never NEXT_PUBLIC_)
+function getAdminEmails(): Set<string> {
+  const raw = process.env.ADMIN_EMAILS ?? "";
+  return new Set(raw.split(",").map((e) => e.trim().toLowerCase()).filter(Boolean));
+}
 
 export default async function AdminPage() {
   // 1. Must be authenticated
@@ -22,7 +19,7 @@ export default async function AdminPage() {
   if (!user) redirect("/login");
 
   // 3. Must be an admin — non-admins are redirected, not shown a 403
-  if (!ADMIN_EMAILS.has(user.email)) redirect("/dashboard");
+  if (!getAdminEmails().has(user.email.toLowerCase())) redirect("/dashboard");
 
   // 4. Load initial key data server-side
   const keysData = await listAdminKeys(token);
