@@ -1,4 +1,5 @@
 import os
+from urllib.parse import parse_qs, urlparse
 
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -12,6 +13,18 @@ from app.models.user import User
 from app.services.token_service import validate_and_use_token
 
 router = APIRouter(tags=["download"])
+
+
+def _is_presigned_url(url: str) -> bool:
+    """Return True if the URL is a Supabase pre-signed URL (/object/sign/ path
+    or has a ?token= query param). Pre-signed URLs carry their own auth and
+    must NOT receive an extra Authorization header."""
+    parsed = urlparse(url)
+    if "/object/sign/" in parsed.path:
+        return True
+    if "token" in parse_qs(parsed.query):
+        return True
+    return False
 
 
 @router.get("/download")
@@ -41,9 +54,11 @@ async def download_file(
         raise HTTPException(status_code=503, detail="Download file not configured.")
 
     if url.startswith(("http://", "https://")):
-        # Fetch from internal/static URL — attach service key for private Supabase Storage
+        # Pre-signed URLs already carry auth in ?token= — adding a service key
+        # header alongside will cause Supabase to reject the request.
+        # Only add the header for plain private-bucket paths.
         headers = {}
-        if settings.SUPABASE_SERVICE_KEY:
+        if settings.SUPABASE_SERVICE_KEY and not _is_presigned_url(url):
             headers["Authorization"] = f"Bearer {settings.SUPABASE_SERVICE_KEY}"
         async with httpx.AsyncClient(timeout=30) as client:
             file_resp = await client.get(url, headers=headers)
