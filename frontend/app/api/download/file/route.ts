@@ -32,11 +32,13 @@ export async function GET(req: NextRequest) {
     );
 
     if (!backendRes.ok) {
-      const msg =
-        backendRes.status === 403
-          ? "Download token expired or already used."
-          : "File download failed.";
-      return new NextResponse(msg, { status: backendRes.status });
+      // Forward the real error detail from FastAPI so it's visible in browser devtools
+      let detail = "File download failed.";
+      try {
+        const body = await backendRes.json();
+        if (body?.detail) detail = body.detail;
+      } catch { /* non-JSON body — keep default */ }
+      return new NextResponse(detail, { status: backendRes.status });
     }
 
     // Pipe stream directly to client

@@ -60,10 +60,16 @@ async def download_file(
         headers = {}
         if settings.SUPABASE_SERVICE_KEY and not _is_presigned_url(url):
             headers["Authorization"] = f"Bearer {settings.SUPABASE_SERVICE_KEY}"
-        async with httpx.AsyncClient(timeout=30) as client:
+        async with httpx.AsyncClient(timeout=60) as client:
             file_resp = await client.get(url, headers=headers)
             if file_resp.status_code != 200:
-                raise HTTPException(status_code=503, detail="File temporarily unavailable.")
+                raise HTTPException(
+                    status_code=503,
+                    detail=(
+                        f"File storage returned {file_resp.status_code}. "
+                        "Ensure DOWNLOAD_FILE_URL is correctly set on the backend host."
+                    ),
+                )
         return Response(
             content=file_resp.content,
             media_type="application/zip",
