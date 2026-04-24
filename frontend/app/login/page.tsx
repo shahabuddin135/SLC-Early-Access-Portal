@@ -2,12 +2,13 @@ import Link from "next/link";
 import LoginForm from "@/components/LoginForm";
 
 interface LoginPageProps {
-  searchParams: Promise<{ registered?: string }>;
+  searchParams: Promise<{ registered?: string; reset?: string }>;
 }
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
   const justRegistered = params.registered === "1";
+  const passwordReset = params.reset === "1";
 
   return (
     <div className="page-center">
@@ -23,6 +24,12 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           {justRegistered && (
             <p className="success-text" style={{ marginBottom: 20, textAlign: "center" }}>
               Account created! Please log in below.
+            </p>
+          )}
+
+          {passwordReset && (
+            <p className="success-text" style={{ marginBottom: 20, textAlign: "center" }}>
+              Password updated. Please log in with your new password.
             </p>
           )}
 

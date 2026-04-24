@@ -25,6 +25,11 @@ export interface TokenResponse {
   user: User;
 }
 
+export interface ForgotPasswordResponse {
+  message: string;
+  reset_url?: string | null;
+}
+
 // ── Auth ─────────────────────────────────────────────────────────────────────
 
 export async function registerUser(data: {
@@ -82,6 +87,71 @@ export async function loginUser(data: {
         : body?.detail ?? "Login failed. Please try again.";
 
     return { ok: false, status: res.status, error: message };
+  } catch {
+    return { ok: false, status: 0, error: "Network error. Please try again." };
+  }
+}
+
+export async function requestPasswordReset(data: {
+  email: string;
+}): Promise<
+  | { ok: true; message: string; resetUrl?: string | null }
+  | { ok: false; status: number; error: string }
+> {
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/v1/auth/forgot-password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+      cache: "no-store",
+    });
+
+    const body = await res.json();
+
+    if (res.ok) {
+      return {
+        ok: true,
+        message: body.message,
+        resetUrl: body.reset_url,
+      };
+    }
+
+    return {
+      ok: false,
+      status: res.status,
+      error: body?.detail ?? "Unable to process reset request. Please try again.",
+    };
+  } catch {
+    return { ok: false, status: 0, error: "Network error. Please try again." };
+  }
+}
+
+export async function resetPassword(data: {
+  token: string;
+  new_password: string;
+}): Promise<
+  | { ok: true; message: string }
+  | { ok: false; status: number; error: string }
+> {
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/v1/auth/reset-password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+      cache: "no-store",
+    });
+
+    const body = await res.json();
+
+    if (res.ok) {
+      return { ok: true, message: body.message };
+    }
+
+    return {
+      ok: false,
+      status: res.status,
+      error: body?.detail ?? "Reset failed. Please request a new link and try again.",
+    };
   } catch {
     return { ok: false, status: 0, error: "Network error. Please try again." };
   }

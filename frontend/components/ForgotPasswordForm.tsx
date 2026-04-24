@@ -2,26 +2,27 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
-export default function LoginForm() {
-  const router = useRouter();
+export default function ForgotPasswordForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+  const [resetUrl, setResetUrl] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
+    setMessage(null);
+    setResetUrl(null);
     setLoading(true);
 
     const form = e.currentTarget;
     const data = {
       email: (form.elements.namedItem("email") as HTMLInputElement).value.trim(),
-      password: (form.elements.namedItem("password") as HTMLInputElement).value,
     };
 
     try {
-      const res = await fetch("/api/auth/login", {
+      const res = await fetch("/api/auth/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -29,9 +30,10 @@ export default function LoginForm() {
       const body = await res.json();
 
       if (res.ok) {
-        router.push("/dashboard");
+        setMessage(body.message ?? "If an account exists for that email, reset instructions have been sent.");
+        setResetUrl(body.resetUrl ?? null);
       } else {
-        setError(body.error ?? "Login failed.");
+        setError(body.error ?? "Unable to process reset request.");
       }
     } catch {
       setError("Network error. Please try again.");
@@ -56,41 +58,27 @@ export default function LoginForm() {
         />
       </div>
 
-      <div className="field" style={{ marginBottom: 24 }}>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 12,
-            marginBottom: 6,
-          }}
-        >
-          <label className="label" htmlFor="password" style={{ marginBottom: 0 }}>
-            Password
-          </label>
-          <Link href="/forgot-password" style={{ fontSize: "0.8125rem" }}>
-            Forgot password?
-          </Link>
-        </div>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          className="input"
-          placeholder="••••••••"
-          required
-          disabled={loading}
-          autoComplete="current-password"
-        />
-      </div>
-
       {error && <p className="error-text" style={{ marginBottom: 16 }}>{error}</p>}
+
+      {message && (
+        <div style={{ marginBottom: 16 }}>
+          <p className="success-text" style={{ marginTop: 0 }}>{message}</p>
+          {resetUrl && (
+            <p style={{ marginTop: 10, fontSize: "0.875rem" }}>
+              Local development reset link: <a href={resetUrl}>{resetUrl}</a>
+            </p>
+          )}
+        </div>
+      )}
 
       <button type="submit" className="btn-primary" disabled={loading}>
         {loading ? <span className="spinner" /> : null}
-        {loading ? "Signing in…" : "Log in"}
+        {loading ? "Sending reset link…" : "Send reset link"}
       </button>
+
+      <p style={{ textAlign: "center", fontSize: "0.875rem", marginTop: 18 }}>
+        Remembered it? <Link href="/login">Back to login</Link>
+      </p>
     </form>
   );
 }
