@@ -39,7 +39,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
           <p style={{ textAlign: "center", fontSize: "0.875rem" }}>
             Don&apos;t have an account?{" "}
-            <Link href="/">Register</Link>
+            <Link href="/register">Register</Link>
           </p>
         </div>
       </div>

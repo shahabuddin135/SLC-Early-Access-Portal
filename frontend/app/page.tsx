@@ -1,28 +1,56 @@
-import Link from "next/link";
-import RegisterForm from "@/components/RegisterForm";
+import SmoothScroll from "@/components/landing/SmoothScroll";
+import Cursor from "@/components/landing/Cursor";
+import HeroWhite from "@/components/landing/HeroWhite";
+import WheelNav from "@/components/landing/WheelNav";
+import ProblemSection from "@/components/landing/ProblemSection";
+import CoreIdeaSection from "@/components/landing/CoreIdeaSection";
+import InsightSection from "@/components/landing/InsightSection";
+import FrameworkSection from "@/components/landing/FrameworkSection";
+import TokenSection from "@/components/landing/TokenSection";
+import SpecGraphSection from "@/components/landing/SpecGraphSection";
+import ProtocolSection from "@/components/landing/ProtocolSection";
+import FolderSection from "@/components/landing/FolderSection";
+import LandingFooter from "@/components/landing/LandingFooter";
+import FlowArt, { FlowSection } from "@/components/story-scroll";
 
-export default function HomePage() {
+export default function LandingPage() {
   return (
-    <div className="page-center">
-      <div className="container">
-        <div className="card">
-          <div style={{ marginBottom: 28, textAlign: "center" }}>
-            <h1 style={{ marginBottom: 8 }}>SLC Early Access</h1>
-            <p style={{ fontSize: "0.9375rem" }}>
-              Register to get early access to the SLC language&nbsp;&amp;&nbsp;framework
-            </p>
-          </div>
+    <>
+      <Cursor />
+      <WheelNav />
+      <SmoothScroll>
+        <HeroWhite />
 
-          <RegisterForm />
+        {/* Card stack: Problem → Syntax */}
+        <FlowArt>
+          <FlowSection style={{ padding: 0 }}>
+            <ProblemSection />
+          </FlowSection>
+          <FlowSection style={{ padding: 0 }}>
+            <CoreIdeaSection />
+          </FlowSection>
+        </FlowArt>
 
-          <div className="divider" />
+        {/* Standalone: has its own GSAP scroll-pin */}
+        <InsightSection />
 
-          <p style={{ textAlign: "center", fontSize: "0.875rem" }}>
-            Already have an account?{" "}
-            <Link href="/login">Log in</Link>
-          </p>
-        </div>
-      </div>
-    </div>
+        {/* Card stack: Framework → Token math */}
+        <FlowArt>
+          <FlowSection style={{ padding: 0 }}>
+            <FrameworkSection id="framework" />
+          </FlowSection>
+          <FlowSection style={{ padding: 0 }}>
+            <TokenSection />
+          </FlowSection>
+        </FlowArt>
+
+        {/* Standalone: complex scroll animations */}
+        <FolderSection />
+        <SpecGraphSection />
+        <ProtocolSection />
+
+        <LandingFooter />
+      </SmoothScroll>
+    </>
   );
 }
