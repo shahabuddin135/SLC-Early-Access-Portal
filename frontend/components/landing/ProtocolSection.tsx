@@ -18,7 +18,7 @@ export default function ProtocolSection() {
         { opacity: 0, yPercent: 80 },
         {
           opacity: 1, yPercent: 0, duration: 0.75, ease: "power3.out", stagger: 0.07,
-          scrollTrigger: { trigger: sectionRef.current, start: "top 82%", toggleActions: "play none none reverse" },
+          scrollTrigger: { trigger: sectionRef.current, start: "top bottom", once: true },
         }
       );
       gsap.fromTo(
@@ -26,7 +26,7 @@ export default function ProtocolSection() {
         { opacity: 0, y: 16 },
         {
           opacity: 1, y: 0, duration: 0.55, delay: 0.4,
-          scrollTrigger: { trigger: sectionRef.current, start: "top 82%" },
+          scrollTrigger: { trigger: sectionRef.current, start: "top bottom", once: true },
         }
       );
     }, sectionRef);

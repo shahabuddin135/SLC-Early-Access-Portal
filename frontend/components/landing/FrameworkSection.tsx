@@ -28,8 +28,8 @@ export default function FrameworkSection({ id }: { id?: string }) {
             opacity: 1, x: 0, duration: 0.45, delay: i * 0.025,
             scrollTrigger: {
               trigger: el,
-              start: "top 95%",
-              toggleActions: "play none none reverse",
+              start: "top bottom",
+              once: true,
             },
           }
         );

@@ -62,8 +62,8 @@ export default function CoreIdeaSection() {
             opacity: 1, x: 0, duration: 0.28, delay: i * 0.016,
             scrollTrigger: {
               trigger: sectionRef.current,
-              start: "top 85%",
-              toggleActions: "play none none reverse",
+              start: "top bottom",
+              once: true,
             },
           }
         );
@@ -74,7 +74,7 @@ export default function CoreIdeaSection() {
         { opacity: 0 },
         {
           opacity: 1, duration: 0.8,
-          scrollTrigger: { trigger: ".syntax-label", start: "top 88%" },
+          scrollTrigger: { trigger: ".syntax-label", start: "top bottom", once: true },
         }
       );
     }, sectionRef);

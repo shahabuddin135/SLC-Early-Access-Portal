@@ -29,6 +29,8 @@ export default function WheelNav() {
     startX: number; startY: number;
     startLeft: number; startTop: number;
   } | null>(null);
+  // Tracks whether the last interaction was a drag so onClick can ignore it
+  const wasDragRef = useRef(false);
 
   // ── GSAP entrance ──────────────────────────────────────────────────────────
   useEffect(() => {
@@ -106,15 +108,17 @@ export default function WheelNav() {
       startLeft: rect.left, startTop: rect.top,
     };
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-    e.preventDefault();
+    // Do NOT call preventDefault here — iOS treats it as a long-press intent
+    // and delays pointerup. touchAction:"none" already prevents scroll.
   }, []);
 
   const onPointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
     if (!dragRef.current) return;
     const dx = e.clientX - dragRef.current.startX;
     const dy = e.clientY - dragRef.current.startY;
-    if (!dragRef.current.active && Math.hypot(dx, dy) < 6) return;
+    if (!dragRef.current.active && Math.hypot(dx, dy) < 10) return;
     dragRef.current.active = true;
+    wasDragRef.current = true;  // mark as drag so onClick won't open nav
     setIsDragging(true);
     const W = 86, H = 86;
     setBtnPos({
@@ -124,9 +128,16 @@ export default function WheelNav() {
   }, []);
 
   const onPointerUp = useCallback(() => {
-    if (dragRef.current && !dragRef.current.active) openNav();
     dragRef.current = null;
     setIsDragging(false);
+    // openNav is handled by onClick — more reliable for mobile single-tap
+  }, []);
+
+  // onClick fires correctly after a simple tap on all mobile browsers,
+  // even without press-and-hold. Skip if the gesture was a drag.
+  const handleClick = useCallback(() => {
+    if (wasDragRef.current) { wasDragRef.current = false; return; }
+    openNav();
   }, []);
 
   const posStyle: React.CSSProperties = btnPos
@@ -144,6 +155,8 @@ export default function WheelNav() {
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
+        onClick={handleClick}
+        onContextMenu={(e) => e.preventDefault()}
         onKeyDown={(e) => e.key === "Enter" && openNav()}
         style={{
           position: "fixed",
@@ -155,6 +168,8 @@ export default function WheelNav() {
           cursor: isDragging ? "grabbing" : "grab",
           touchAction: "none",
           userSelect: "none",
+          WebkitUserSelect: "none",
+          WebkitTouchCallout: "none" as React.CSSProperties["WebkitTouchCallout"],
           background: "#FF4500",
           borderRadius: "50%",
         }}

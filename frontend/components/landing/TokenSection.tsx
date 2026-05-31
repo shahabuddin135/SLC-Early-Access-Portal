@@ -48,31 +48,31 @@ export default function TokenSection() {
         ".tok-headline",
         { opacity: 0, y: 32 },
         { opacity: 1, y: 0, duration: 0.7,
-          scrollTrigger: { trigger: sectionRef.current, start: "top 80%", toggleActions: "play none none reverse" } }
+          scrollTrigger: { trigger: sectionRef.current, start: "top bottom", once: true } }
       );
       gsap.fromTo(
         ".tok-left-panel",
         { opacity: 0, x: -36 },
         { opacity: 1, x: 0, duration: 0.65, delay: 0.1,
-          scrollTrigger: { trigger: sectionRef.current, start: "top 75%", toggleActions: "play none none reverse" } }
+          scrollTrigger: { trigger: sectionRef.current, start: "top bottom", once: true } }
       );
       gsap.fromTo(
         ".tok-right-panel",
         { opacity: 0, x: 36 },
         { opacity: 1, x: 0, duration: 0.65, delay: 0.1,
-          scrollTrigger: { trigger: sectionRef.current, start: "top 75%", toggleActions: "play none none reverse" } }
+          scrollTrigger: { trigger: sectionRef.current, start: "top bottom", once: true } }
       );
       gsap.fromTo(
         ".slc-line",
         { opacity: 0, x: 16 },
         { opacity: 1, x: 0, duration: 0.35, stagger: 0.07, delay: 0.35,
-          scrollTrigger: { trigger: sectionRef.current, start: "top 75%", toggleActions: "play none none reverse" } }
+          scrollTrigger: { trigger: sectionRef.current, start: "top bottom", once: true } }
       );
       gsap.fromTo(
         ".tok-stat",
         { opacity: 0, y: 20 },
         { opacity: 1, y: 0, duration: 0.5, stagger: 0.1,
-          scrollTrigger: { trigger: ".tok-stats-strip", start: "top 88%" } }
+          scrollTrigger: { trigger: ".tok-stats-strip", start: "top bottom", once: true } }
       );
     }, sectionRef);
     return () => ctx.revert();
