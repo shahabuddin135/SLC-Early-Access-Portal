@@ -44,18 +44,18 @@ app.add_middleware(SlowAPIMiddleware)
 
 
 # ── CORS ──────────────────────────────────────────────────────────────────────
-allowed_origins = (
-    [settings.FRONTEND_URL]
-    if settings.ENVIRONMENT == "production"
-    else ["http://localhost:3000", "http://127.0.0.1:3000"]
-)
+# Build allowed origins list — in production, if FRONTEND_URL is set, use it
+# Always allow localhost for development. Vercel preview apps handled via allowlist.
+allowed_origins = ["http://localhost:3000", "http://127.0.0.1:3000"]
+if settings.FRONTEND_URL:
+    allowed_origins.insert(0, settings.FRONTEND_URL)
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["Authorization", "Content-Type"],
+    allow_headers=["Authorization", "Content-Type", "X-App-Base-Url"],
 )
 
 

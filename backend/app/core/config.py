@@ -12,7 +12,9 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440
     PASSWORD_RESET_TOKEN_EXPIRE_MINUTES: int = 60
     EMAIL_VERIFICATION_TOKEN_EXPIRE_MINUTES: int = 1440
-    FRONTEND_URL: str = "http://localhost:3000"
+    # FRONTEND_URL is optional — in production, rely on X-Forwarded-Host header
+    # Only used as fallback if env var is explicitly set
+    FRONTEND_URL: str = ""
     # Extra comma-separated hostnames allowed in emailed links (besides FRONTEND_URL's
     # host, *.vercel.app and localhost). Usually unnecessary.
     ALLOWED_REDIRECT_HOSTS: str = ""
