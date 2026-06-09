@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { reviewAction } from "@/app/actions/review";
+import { capture } from "@/lib/analytics";
 
 type FormState = "idle" | "loading" | "success" | "error";
 
@@ -23,6 +24,7 @@ export default function ReviewForm() {
     try {
       const result = await reviewAction(data);
       if (result.ok) {
+        capture("review_submitted");
         setState("success");
       } else {
         setError(result.error);

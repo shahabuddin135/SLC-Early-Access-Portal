@@ -46,6 +46,17 @@ def create_password_reset_token(*, user_id: int, email: str, password_hash: str)
     )
 
 
+def create_email_verification_token(*, user_id: int, email: str) -> str:
+    return _create_token(
+        {
+            "sub": str(user_id),
+            "email": email,
+            "type": "email_verify",
+        },
+        timedelta(minutes=settings.EMAIL_VERIFICATION_TOKEN_EXPIRE_MINUTES),
+    )
+
+
 def _decode_token(token: str) -> dict:
     return jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
 
@@ -74,6 +85,24 @@ def decode_password_reset_token(token: str) -> dict:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid or expired reset link",
+        )
+
+    return payload
+
+
+def decode_email_verification_token(token: str) -> dict:
+    try:
+        payload = _decode_token(token)
+    except JWTError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired verification link",
+        )
+
+    if payload.get("type") != "email_verify":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired verification link",
         )
 
     return payload

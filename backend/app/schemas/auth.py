@@ -54,6 +54,17 @@ class ResetPasswordRequest(BaseModel):
         return v
 
 
+class VerifyEmailRequest(BaseModel):
+    token: str
+
+    @field_validator("token")
+    @classmethod
+    def token_must_not_be_empty(cls, v: str) -> str:
+        if not v.strip():
+            raise ValueError("Verification token is required")
+        return v
+
+
 class MessageResponse(BaseModel):
     message: str
 

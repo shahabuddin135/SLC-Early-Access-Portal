@@ -11,7 +11,11 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440
     PASSWORD_RESET_TOKEN_EXPIRE_MINUTES: int = 60
+    EMAIL_VERIFICATION_TOKEN_EXPIRE_MINUTES: int = 1440
     FRONTEND_URL: str = "http://localhost:3000"
+    # Extra comma-separated hostnames allowed in emailed links (besides FRONTEND_URL's
+    # host, *.vercel.app and localhost). Usually unnecessary.
+    ALLOWED_REDIRECT_HOSTS: str = ""
     ENVIRONMENT: str = "development"
     RESEND_API_KEY: str = ""
 

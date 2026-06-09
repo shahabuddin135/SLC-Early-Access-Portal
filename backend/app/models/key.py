@@ -15,3 +15,7 @@ class Key(SQLModel, table=True):
     )
     used_at: Optional[datetime] = Field(default=None)
     used_by: Optional[str] = Field(default=None, max_length=255)
+    # When set, the key is bound to this email and can only be redeemed by that
+    # account. NULL = legacy open-pool key, redeemable by anyone.
+    assigned_email: Optional[str] = Field(default=None, max_length=255, index=True)
+    assigned_at: Optional[datetime] = Field(default=None)

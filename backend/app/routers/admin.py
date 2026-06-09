@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from typing import Optional
+
+from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -7,7 +9,12 @@ from app.core.database import get_session
 from app.dependencies.admin import get_admin_user
 from app.models.key import Key
 from app.models.user import User
-from app.services.key_service import generate_keys, list_keys
+from app.services.key_service import (
+    generate_keys,
+    key_stats,
+    search_keys,
+    suggest_keys,
+)
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -21,6 +28,7 @@ class KeyOut(BaseModel):
     created_at: str
     used_at: str | None
     used_by: str | None
+    assigned_email: str | None
 
     @classmethod
     def from_orm(cls, k: Key) -> "KeyOut":
@@ -31,6 +39,7 @@ class KeyOut(BaseModel):
             created_at=k.created_at.isoformat() if k.created_at else "",
             used_at=k.used_at.isoformat() if k.used_at else None,
             used_by=k.used_by,
+            assigned_email=k.assigned_email,
         )
 
 
@@ -41,6 +50,10 @@ class KeysResponse(BaseModel):
     unused: int
 
 
+class SuggestionsResponse(BaseModel):
+    suggestions: list[str]
+
+
 class GenerateRequest(BaseModel):
     count: int = Field(..., ge=1, le=100, description="Number of keys to generate (1-100)")
 
@@ -49,19 +62,36 @@ class GenerateRequest(BaseModel):
 
 @router.get("/keys", response_model=KeysResponse)
 async def get_keys(
+    q: Optional[str] = Query(default=None),
+    status: Optional[str] = Query(default=None),
+    limit: int = Query(default=20, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
     _admin: User = Depends(get_admin_user),
     session: AsyncSession = Depends(get_session),
 ):
-    """List all keys with stats. Admin-only."""
-    keys = await list_keys(session)
-    key_outs = [KeyOut.from_orm(k) for k in keys]
-    used_count = sum(1 for k in keys if k.used)
-    return KeysResponse(
-        keys=key_outs,
-        total=len(keys),
-        used=used_count,
-        unused=len(keys) - used_count,
+    """Filtered, paginated keys with global stats. Admin-only.
+
+    `total`/`used`/`unused` reflect the whole table (for the stat cards), while
+    `keys` is the current filtered page (for the lazy-loaded table)."""
+    page, _filtered_total = await search_keys(
+        session, q=q, status_filter=status, limit=limit, offset=offset
     )
+    stats = await key_stats(session)
+    return KeysResponse(
+        keys=[KeyOut.from_orm(k) for k in page],
+        total=stats["total"],
+        used=stats["used"],
+        unused=stats["unused"],
+    )
+
+
+@router.get("/keys/suggestions", response_model=SuggestionsResponse)
+async def get_key_suggestions(
+    q: str = Query(default=""),
+    _admin: User = Depends(get_admin_user),
+    session: AsyncSession = Depends(get_session),
+):
+    return SuggestionsResponse(suggestions=await suggest_keys(session, q=q))
 
 
 @router.post("/keys/generate", response_model=list[KeyOut], status_code=201)

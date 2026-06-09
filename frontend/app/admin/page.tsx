@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getAuthToken } from "@/lib/auth";
-import { getDashboard, listAdminKeys } from "@/lib/api";
+import { getDashboard, listAdminKeys, listAdminRequests } from "@/lib/api";
 import AdminDashboard from "@/components/AdminDashboard";
 
 // Admin emails — loaded from ADMIN_EMAILS env var (server-side only, never NEXT_PUBLIC_)
@@ -21,17 +21,20 @@ export default async function AdminPage() {
   // 3. Must be an admin — non-admins are redirected, not shown a 403
   if (!getAdminEmails().has(user.email.toLowerCase())) redirect("/dashboard");
 
-  // 4. Load initial key data server-side
-  const keysData = await listAdminKeys(token);
-  if (!keysData) redirect("/dashboard");
+  // 4. Load the first page of each tab server-side (default filters)
+  const [requestsData, keysData] = await Promise.all([
+    listAdminRequests(token),
+    listAdminKeys(token),
+  ]);
+  if (!requestsData || !keysData) redirect("/dashboard");
 
   return (
     <div
       className="page-center"
       style={{ justifyContent: "flex-start", paddingTop: 48 }}
     >
-      <div className="container" style={{ maxWidth: 900 }}>
-        <AdminDashboard initialData={keysData} />
+      <div className="container" style={{ maxWidth: 1040 }}>
+        <AdminDashboard initialRequests={requestsData} initialKeys={keysData} />
       </div>
     </div>
   );

@@ -9,6 +9,9 @@ logger = logging.getLogger(__name__)
 
 _FROM = "SLC Framework <noreply@wewiselabs.com>"
 
+# Featured illustration for email hero
+_FEATURED_ILLUSTRATION = "https://res.cloudinary.com/didt1ywys/image/upload/v1781002983/happy_jump_djg2ti.png"
+
 
 def _send_via_resend(*, to: str, subject: str, html: str, text: str) -> None:
     resend.api_key = settings.RESEND_API_KEY
@@ -23,193 +26,163 @@ def _send_via_resend(*, to: str, subject: str, html: str, text: str) -> None:
     )
 
 
-def _build_reset_html(name: str, reset_url: str, expires: int) -> str:
+
+def _branded_email(
+    *,
+    eyebrow: str,
+    title_html: str,
+    intro_html: str,
+    code_value: str | None = None,
+    code_caption: str | None = None,
+    cta_url: str | None = None,
+    cta_label: str | None = None,
+    note_html: str | None = None,
+) -> str:
+    """The shared, warm SLC email card: orange-glow hero with a featured illustration,
+    slim light typography, an optional access-key block, CTA."""
+    hero = _FEATURED_ILLUSTRATION
+
+    code_block = (
+        f"""
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:4px 0 22px;">
+                <tr>
+                  <td align="center" style="
+                    background:
+                      radial-gradient(ellipse 90% 120% at 50% 0%, rgba(249,115,22,0.18) 0%, transparent 70%),
+                      #0C0C0C;
+                    border:1px solid rgba(249,115,22,0.30);
+                    border-radius:14px;padding:22px 18px;">
+                    <div style="font-size:10.5px;font-weight:600;letter-spacing:0.22em;
+                                text-transform:uppercase;color:#7C7C84;margin-bottom:12px;">
+                      Your Access Key
+                    </div>
+                    <div style="font-size:23px;font-weight:600;letter-spacing:0.14em;
+                                color:#FB923C;font-family:'SF Mono','Courier New',monospace;
+                                word-break:break-all;">
+                      {code_value}
+                    </div>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin:0 0 26px;font-size:12.5px;line-height:1.6;color:#6B7280;text-align:center;">
+                {code_caption or "Keep this key private — it's tied to your account."}
+              </p>"""
+        if code_value
+        else ""
+    )
+
+    cta_block = (
+        f"""
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 auto 30px;">
+                <tr>
+                  <td align="center" style="
+                    border-radius:12px;
+                    background:linear-gradient(135deg,#FB923C 0%,#EA580C 100%);
+                    box-shadow:0 10px 34px rgba(249,115,22,0.40);">
+                    <a href="{cta_url}"
+                       style="display:inline-block;padding:15px 38px;
+                              font-size:15px;font-weight:600;letter-spacing:0.01em;
+                              color:#ffffff;text-decoration:none;">
+                      {cta_label} &nbsp;&rarr;
+                    </a>
+                  </td>
+                </tr>
+              </table>"""
+        if cta_url and cta_label
+        else ""
+    )
+
+    note_block = (
+        f"""
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="
+                    background:rgba(249,115,22,0.06);
+                    border:1px solid rgba(249,115,22,0.16);
+                    border-radius:10px;padding:14px 16px;">
+                    <p style="margin:0;font-size:12.5px;line-height:1.65;color:#9CA3AF;">
+                      {note_html}
+                    </p>
+                  </td>
+                </tr>
+              </table>"""
+        if note_html
+        else ""
+    )
+
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Reset your SLC Framework password</title>
+<title>SLC Framework</title>
 </head>
-<body style="margin:0;padding:0;background:#0A0A0A;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
-
-  <!-- ░░ Outer wrapper ░░ -->
-  <table width="100%" cellpadding="0" cellspacing="0" border="0"
-         style="background:#0A0A0A;min-height:100vh;">
+<body style="margin:0;padding:0;background:#070707;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#070707;">
     <tr>
-      <td align="center" style="padding:48px 16px;">
+      <td align="center" style="padding:40px 16px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+               style="max-width:600px;border-radius:22px;overflow:hidden;
+                      box-shadow:0 0 0 1px rgba(255,255,255,0.06), 0 40px 90px rgba(0,0,0,0.75);">
 
-        <!-- ░░ Card ░░ -->
-        <table width="100%" cellpadding="0" cellspacing="0" border="0"
-               style="max-width:540px;border-radius:16px;overflow:hidden;
-                      box-shadow:0 0 0 1px rgba(255,255,255,0.08),
-                                 0 32px 80px rgba(0,0,0,0.7);">
-
-          <!-- ══ ABSTRACT HERO ══ -->
+          <!-- ══ HERO ══ -->
           <tr>
-            <td style="
-              padding:0;
+            <td align="center" style="
+              padding:38px 24px 30px;
               background:
-                radial-gradient(ellipse 80% 60% at 10% 110%, #7C3AED 0%, transparent 55%),
-                radial-gradient(ellipse 70% 50% at 90% -10%, #F97316 0%, transparent 55%),
-                radial-gradient(ellipse 60% 80% at 50% 50%, #0EA5E9 0%, transparent 65%),
-                radial-gradient(ellipse 55% 40% at 80% 90%, #EC4899 0%, transparent 50%),
-                linear-gradient(135deg, #0F0414 0%, #0A1628 50%, #0F0414 100%);
-              position:relative;
-              height:220px;
-              text-align:center;">
+                radial-gradient(circle at 50% 18%, rgba(249,115,22,0.42) 0%, transparent 52%),
+                radial-gradient(ellipse 80% 60% at 12% 105%, rgba(124,58,237,0.22) 0%, transparent 60%),
+                linear-gradient(160deg, #140a06 0%, #0B0B10 60%, #0A0A0A 100%);">
 
-              <!-- Floating orbs via inline bordered divs (table-safe fallback) -->
-              <div style="position:absolute;top:20px;left:30px;
-                          width:80px;height:80px;border-radius:50%;
-                          background:radial-gradient(circle,rgba(249,115,22,0.35),transparent 70%);
-                          filter:blur(12px);"></div>
-              <div style="position:absolute;bottom:10px;right:20px;
-                          width:120px;height:120px;border-radius:50%;
-                          background:radial-gradient(circle,rgba(124,58,237,0.4),transparent 70%);
-                          filter:blur(18px);"></div>
-              <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-                          width:160px;height:60px;border-radius:50%;
-                          background:radial-gradient(circle,rgba(14,165,233,0.25),transparent 70%);
-                          filter:blur(20px);"></div>
+              <div style="font-size:11px;font-weight:700;letter-spacing:0.30em;
+                          text-transform:uppercase;color:rgba(255,255,255,0.42);margin-bottom:22px;">
+                WeWise&nbsp;Labs
+              </div>
 
-              <!-- Logo / wordmark -->
-              <div style="position:absolute;top:50%;left:50%;
-                          transform:translate(-50%,-50%);
-                          text-align:center;">
-                <div style="display:inline-block;
-                             background:rgba(255,255,255,0.06);
-                             border:1px solid rgba(255,255,255,0.12);
-                             border-radius:12px;padding:10px 22px;
-                             backdrop-filter:blur(8px);">
-                  <span style="font-size:13px;font-weight:800;letter-spacing:0.18em;
-                                text-transform:uppercase;color:rgba(255,255,255,0.5);">
-                    WeWise Labs
-                  </span>
-                </div>
-                <div style="margin-top:14px;">
-                  <span style="font-size:36px;font-weight:900;letter-spacing:-0.03em;
-                                color:#fff;text-shadow:0 0 40px rgba(249,115,22,0.6);">
-                    SLC
-                  </span>
-                  <span style="font-size:36px;font-weight:300;letter-spacing:-0.01em;
-                                color:rgba(255,255,255,0.55);">
-                    &nbsp;Framework
-                  </span>
-                </div>
+              <!-- featured illustration - large top image -->
+              <img src="{hero}" width="180" height="180" alt=""
+                   style="display:inline-block;width:180px;height:180px;object-fit:contain;
+                          filter:drop-shadow(0 14px 30px rgba(249,115,22,0.45));" />
+
+              <div style="margin-top:18px;">
+                <span style="font-size:30px;font-weight:200;letter-spacing:-0.01em;color:#ffffff;">SLC</span>
+                <span style="font-size:30px;font-weight:200;letter-spacing:0.01em;color:rgba(255,255,255,0.5);">&nbsp;Framework</span>
               </div>
             </td>
           </tr>
 
           <!-- ══ CONTENT ══ -->
           <tr>
-            <td style="background:#111111;padding:44px 40px 36px;">
-
-              <!-- Greeting -->
-              <p style="margin:0 0 8px;font-size:13px;font-weight:600;
-                         letter-spacing:0.1em;text-transform:uppercase;
-                         color:#F97316;">
-                Password Reset
-              </p>
-              <h1 style="margin:0 0 20px;font-size:26px;font-weight:800;
-                          letter-spacing:-0.03em;color:#FFFFFF;line-height:1.25;">
-                Hey {name}, let&rsquo;s get<br/>you back in.
-              </h1>
-              <p style="margin:0 0 32px;font-size:15px;line-height:1.7;color:#9CA3AF;">
-                We received a request to reset the password for your
-                <strong style="color:#E5E7EB;">SLC Framework</strong> account.
-                Click the button below &mdash; the link expires in
-                <strong style="color:#F97316;">{expires}&nbsp;minutes</strong>.
-              </p>
-
-              <!-- CTA button -->
-              <table cellpadding="0" cellspacing="0" border="0" style="margin:0 auto 32px;">
-                <tr>
-                  <td align="center" style="
-                    border-radius:10px;
-                    background:linear-gradient(135deg,#F97316 0%,#EA580C 100%);
-                    box-shadow:0 8px 32px rgba(249,115,22,0.45);">
-                    <a href="{reset_url}"
-                       style="display:inline-block;padding:16px 40px;
-                              font-size:15px;font-weight:700;letter-spacing:0.02em;
-                              color:#ffffff;text-decoration:none;">
-                      Reset Password &rarr;
-                    </a>
-                  </td>
-                </tr>
-              </table>
-
-              <!-- Divider -->
-              <table width="100%" cellpadding="0" cellspacing="0" border="0"
-                     style="margin:0 0 28px;">
-                <tr>
-                  <td style="height:1px;
-                    background:linear-gradient(90deg,transparent,#222,transparent);"></td>
-                </tr>
-              </table>
-
-              <!-- Fallback link -->
-              <p style="margin:0 0 6px;font-size:12px;color:#6B7280;">
-                If the button doesn&rsquo;t work, copy and paste this URL:
-              </p>
-              <p style="margin:0 0 28px;font-size:11px;word-break:break-all;
-                         color:#4B5563;font-family:'Courier New',monospace;">
-                {reset_url}
-              </p>
-
-              <!-- Didn't request notice -->
-              <table width="100%" cellpadding="0" cellspacing="0" border="0">
-                <tr>
-                  <td style="
-                    background:rgba(249,115,22,0.06);
-                    border:1px solid rgba(249,115,22,0.15);
-                    border-radius:8px;padding:14px 16px;">
-                    <p style="margin:0;font-size:12.5px;line-height:1.6;color:#9CA3AF;">
-                      &#x26A0;&#xFE0F;&ensp;Didn&rsquo;t request this?
-                      Your password has <strong style="color:#E5E7EB;">not</strong> been changed.
-                      You can safely ignore this email.
-                    </p>
-                  </td>
-                </tr>
-              </table>
-
+            <td style="background:#0E0E0E;padding:40px 42px 30px;">
+              <p style="margin:0 0 12px;font-size:12px;font-weight:600;letter-spacing:0.16em;
+                         text-transform:uppercase;color:#FB923C;">{eyebrow}</p>
+              <h1 style="margin:0 0 18px;font-size:29px;font-weight:200;
+                          letter-spacing:-0.02em;color:#FFFFFF;line-height:1.25;">{title_html}</h1>
+              <p style="margin:0 0 26px;font-size:15.5px;font-weight:300;line-height:1.75;color:#A8AAB3;">{intro_html}</p>
+              {code_block}
+              {cta_block}
+              {note_block}
             </td>
           </tr>
 
           <!-- ══ FOOTER ══ -->
           <tr>
-            <td style="
-              background:#0D0D0D;
-              border-top:1px solid #1A1A1A;
-              padding:24px 40px;
-              text-align:center;">
-
-              <!-- Abstract footer bar -->
-              <table width="100%" cellpadding="0" cellspacing="0" border="0"
-                     style="margin:0 auto 18px;">
-                <tr>
-                  <td style="height:3px;border-radius:99px;
-                    background:linear-gradient(90deg,#7C3AED,#F97316,#0EA5E9,#EC4899);"></td>
-                </tr>
+            <td style="background:#080808;padding:22px 40px 26px;text-align:center;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 auto 16px;">
+                <tr><td style="height:3px;border-radius:99px;
+                  background:linear-gradient(90deg,#7C3AED,#FB923C,#0EA5E9,#EC4899);"></td></tr>
               </table>
-
-              <p style="margin:0 0 4px;font-size:12px;font-weight:700;
-                         letter-spacing:0.12em;text-transform:uppercase;color:#374151;">
-                WeWise Labs
-              </p>
-              <p style="margin:0;font-size:11px;color:#374151;letter-spacing:0.02em;">
-                This is an automated message &mdash; please do not reply.
+              <p style="margin:0 0 4px;font-size:11.5px;font-weight:600;letter-spacing:0.14em;
+                         text-transform:uppercase;color:#3A3A42;">WeWise Labs</p>
+              <p style="margin:0;font-size:11px;font-weight:300;color:#3A3A42;letter-spacing:0.02em;">
+                Made with love for early builders - please don't reply to this message.
               </p>
             </td>
           </tr>
-
         </table>
-        <!-- /card -->
-
       </td>
     </tr>
   </table>
-
 </body>
 </html>"""
 
@@ -218,16 +191,30 @@ async def send_password_reset_email(*, email: str, name: str, reset_url: str) ->
     if not settings.resend_enabled:
         return False
 
-    expires = settings.PASSWORD_RESET_TOKEN_EXPIRE_MINUTES
+    expires_minutes = settings.PASSWORD_RESET_TOKEN_EXPIRE_MINUTES
+    expires_hours = expires_minutes // 60
     subject = "Reset your SLC Framework password"
     text = (
         f"Hi {name},\n\n"
         "We received a request to reset your SLC Framework password.\n"
         f"Use the link below to choose a new password:\n\n{reset_url}\n\n"
-        f"This link expires in {expires} minutes.\n"
+        f"This link expires in {expires_hours} hours.\n"
         "If you did not request this change, you can safely ignore this email."
     )
-    html = _build_reset_html(name=name, reset_url=reset_url, expires=expires)
+    html = _branded_email(
+        eyebrow="Password reset",
+        title_html=f"Hey {name}, let's get<br/>you back in.",
+        intro_html=(
+            "No worries - it happens to all of us. Tap the button below to choose a "
+            "fresh password for your <strong style=\"color:#E5E7EB;font-weight:400;\">SLC "
+            f"Framework</strong> account. This link is good for <strong style=\"color:#FB923C;font-weight:400;\">{expires_hours} hours</strong>."
+        ),
+        cta_url=reset_url,
+        cta_label="Reset my password",
+        note_html=(
+            "Didn't ask for this? Your password is still safe and unchanged. You can safely ignore this email."
+        ),
+    )
 
     try:
         await asyncio.to_thread(
@@ -235,11 +222,100 @@ async def send_password_reset_email(*, email: str, name: str, reset_url: str) ->
         )
     except Exception as exc:
         logger.error(
-            "Failed to send password reset email to %s — Resend error: %s",
-            email,
-            exc,
+            "Failed to send password reset email to %s — Resend error: %s", email, exc
         )
         return False
 
     logger.info("Password reset email sent to %s", email)
+    return True
+
+
+async def send_verification_email(*, email: str, name: str, verify_url: str) -> bool:
+    if not settings.resend_enabled:
+        return False
+
+    expires_minutes = settings.EMAIL_VERIFICATION_TOKEN_EXPIRE_MINUTES
+    expires_hours = expires_minutes // 60
+    subject = "Welcome! Confirm your email for SLC early access"
+    text = (
+        f"Hi {name},\n\n"
+        "We're so glad you're here. Confirm your email to unlock access requests "
+        "for the SLC framework.\n\n"
+        f"Verify here:\n{verify_url}\n\n"
+        f"This link expires in {expires_hours} hours.\n"
+        "If you didn't create an SLC account, you can ignore this email."
+    )
+    html = _branded_email(
+        eyebrow="Welcome aboard",
+        title_html=f"So glad you're here,<br/>{name}.",
+        intro_html=(
+            "You're one tap away from joining the SLC early-access family. Confirm "
+            "your email and you'll be able to request your personal download key. "
+            f"This link is good for <strong style=\"color:#FB923C;font-weight:400;\">{expires_hours} hours</strong>."
+        ),
+        cta_url=verify_url,
+        cta_label="Confirm my email",
+        note_html=(
+            "Didn't sign up? No problem. You can safely ignore this email."
+        ),
+    )
+
+    try:
+        await asyncio.to_thread(
+            _send_via_resend, to=email, subject=subject, html=html, text=text
+        )
+    except Exception as exc:
+        logger.error("Failed to send verification email to %s — Resend error: %s", email, exc)
+        return False
+
+    logger.info("Verification email sent to %s", email)
+    return True
+
+
+async def send_access_key_email(
+    *, email: str, name: str, key_value: str, dashboard_url: str
+) -> bool:
+    if not settings.resend_enabled:
+        return False
+
+    subject = "You're in! Your SLC access key is ready"
+    text = (
+        f"Hi {name},\n\n"
+        "Wonderful news - your access request was approved and we're thrilled to have you.\n\n"
+        f"Your one-time access key:\n{key_value}\n\n"
+        "Open your dashboard to reveal and copy it in one tap, then download the framework:\n"
+        f"{dashboard_url}\n\n"
+        "This key is tied to your account and can only be redeemed by you."
+    )
+    html = _branded_email(
+        eyebrow="Access granted",
+        title_html=f"Welcome to the family,<br/>{name}.",
+        intro_html=(
+            "We're genuinely happy to have you. Your access request was "
+            "<strong style=\"color:#E5E7EB;font-weight:400;\">approved</strong> - here's "
+            "your personal one-time key for the SLC language &amp; framework."
+        ),
+        code_value=key_value,
+        code_caption=(
+            "Tap the button below to open your dashboard, where you can reveal &amp; "
+            "copy this key in one click. It's tied to your account - only you can use it."
+        ),
+        cta_url=dashboard_url,
+        cta_label="Open my dashboard",
+        note_html=(
+            "A heads-up: SLC is improved every single day during early access, so "
+            "you may occasionally need to smooth over a small rough edge while you build. "
+            "We're always one message away at wewiselabs@gmail.com. Happy building!"
+        ),
+    )
+
+    try:
+        await asyncio.to_thread(
+            _send_via_resend, to=email, subject=subject, html=html, text=text
+        )
+    except Exception as exc:
+        logger.error("Failed to send access key email to %s — Resend error: %s", email, exc)
+        return False
+
+    logger.info("Access key email sent to %s", email)
     return True

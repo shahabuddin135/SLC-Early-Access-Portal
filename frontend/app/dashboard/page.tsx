@@ -2,9 +2,9 @@ import { redirect } from "next/navigation";
 import { getAuthToken } from "@/lib/auth";
 import { getDashboard } from "@/lib/api";
 import ProfileHeader from "@/components/ProfileHeader";
-import DownloadSection from "@/components/DownloadSection";
+import EmailVerificationBanner from "@/components/EmailVerificationBanner";
+import AccessRequestSection from "@/components/AccessRequestSection";
 import ReviewForm from "@/components/ReviewForm";
-import TermsAgreementModal from "@/components/TermsAgreementModal";
 
 function getAdminEmails(): Set<string> {
   const raw = process.env.ADMIN_EMAILS ?? "";
@@ -28,9 +28,6 @@ export default async function DashboardPage() {
 
   return (
     <div className="page-center" style={{ justifyContent: "flex-start", paddingTop: 48 }}>
-      {/* Blocking modal — shown until user agrees to WeWise Labs terms */}
-      {!data.has_agreed_terms && <TermsAgreementModal />}
-
       <div className="container" style={{ maxWidth: 560 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
           <h1 style={{ fontSize: "1.25rem", flex: 1 }}>
@@ -39,9 +36,16 @@ export default async function DashboardPage() {
           <span className="ww-badge" style={{ fontSize: "0.6875rem" }}>WeWise Labs</span>
         </div>
 
+        {!data.email_verified && <EmailVerificationBanner email={data.email} />}
+
         <ProfileHeader user={data} isAdmin={isAdmin} />
 
-        <DownloadSection hasDownloaded={data.has_downloaded} />
+        <AccessRequestSection
+          emailVerified={data.email_verified}
+          accessRequestStatus={data.access_request_status}
+          hasDownloaded={data.has_downloaded}
+          accessKey={data.access_key}
+        />
 
         {data.has_downloaded && (
           <div className="fade-in" style={{ marginTop: 24 }}>

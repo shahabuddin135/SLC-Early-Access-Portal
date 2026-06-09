@@ -7,7 +7,9 @@ class DashboardResponse(BaseModel):
     email: str
     github_id: str
     has_downloaded: bool
-    has_agreed_terms: bool
+    email_verified: bool
+    access_request_status: str | None = None
+    access_key: str | None = None
 
 
 class DownloadResponse(BaseModel):

@@ -13,5 +13,6 @@ class User(SQLModel, table=True):
     github_id: str = Field(max_length=100)
     password_hash: str
     has_downloaded: bool = Field(default=False)
-    terms_agreed_at: Optional[datetime] = Field(default=None)
+    email_verified: bool = Field(default=False)
+    email_verified_at: Optional[datetime] = Field(default=None)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc).replace(tzinfo=None))

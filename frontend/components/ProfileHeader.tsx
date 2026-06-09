@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { identify, resetIdentity } from "@/lib/analytics";
 import type { DashboardData } from "@/lib/api";
 
 interface ProfileHeaderProps {
@@ -11,7 +13,13 @@ interface ProfileHeaderProps {
 export default function ProfileHeader({ user, isAdmin }: ProfileHeaderProps) {
   const router = useRouter();
 
+  // Tie analytics events to this account once we know who's signed in.
+  useEffect(() => {
+    identify(user.email, { name: user.name, email: user.email });
+  }, [user.email, user.name]);
+
   async function handleLogout() {
+    resetIdentity();
     await fetch("/api/auth/logout", { method: "POST" });
     router.push("/login");
     router.refresh();

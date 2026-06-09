@@ -127,13 +127,14 @@ export default function HeroZoom() {
   });
 
   // Individual scale transforms — no loops (Rules of Hooks)
-  const s0 = useTransform(scrollYProgress, [0, 1], [1, 4]); // SLC center
-  const s1 = useTransform(scrollYProgress, [0, 1], [1, 5]);
-  const s2 = useTransform(scrollYProgress, [0, 1], [1, 6]);
-  const s3 = useTransform(scrollYProgress, [0, 1], [1, 5]);
-  const s4 = useTransform(scrollYProgress, [0, 1], [1, 6]);
-  const s5 = useTransform(scrollYProgress, [0, 1], [1, 8]);
-  const s6 = useTransform(scrollYProgress, [0, 1], [1, 9]);
+  // All scales set to 1 to remove zoom/bobbing animations
+  const s0 = useTransform(scrollYProgress, [0, 1], [1, 1]); // SLC center
+  const s1 = useTransform(scrollYProgress, [0, 1], [1, 1]);
+  const s2 = useTransform(scrollYProgress, [0, 1], [1, 1]);
+  const s3 = useTransform(scrollYProgress, [0, 1], [1, 1]);
+  const s4 = useTransform(scrollYProgress, [0, 1], [1, 1]);
+  const s5 = useTransform(scrollYProgress, [0, 1], [1, 1]);
+  const s6 = useTransform(scrollYProgress, [0, 1], [1, 1]);
   const scales = [s0, s1, s2, s3, s4, s5, s6];
 
   // Hack cards: fade out by 55% scroll

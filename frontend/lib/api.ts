@@ -3,6 +3,12 @@
 
 const BACKEND_URL = process.env.BACKEND_URL ?? "http://localhost:8000";
 
+// Forwards the caller's public origin so the backend builds links (verification,
+// reset, dashboard) for the right deployment. Validated server-side against an allowlist.
+function baseUrlHeader(baseUrl?: string | null): Record<string, string> {
+  return baseUrl ? { "X-App-Base-Url": baseUrl } : {};
+}
+
 // ── Types ────────────────────────────────────────────────────────────────────
 
 export interface User {
@@ -13,10 +19,14 @@ export interface User {
   has_downloaded?: boolean;
 }
 
+export type AccessRequestStatus = "pending" | "granted" | "denied";
+
 export interface DashboardData extends User {
   github_id: string;
   has_downloaded: boolean;
-  has_agreed_terms: boolean;
+  email_verified: boolean;
+  access_request_status: AccessRequestStatus | null;
+  access_key: string | null;
 }
 
 export interface TokenResponse {
@@ -92,16 +102,17 @@ export async function loginUser(data: {
   }
 }
 
-export async function requestPasswordReset(data: {
-  email: string;
-}): Promise<
+export async function requestPasswordReset(
+  data: { email: string },
+  baseUrl?: string | null
+): Promise<
   | { ok: true; message: string; resetUrl?: string | null }
   | { ok: false; status: number; error: string }
 > {
   try {
     const res = await fetch(`${BACKEND_URL}/api/v1/auth/forgot-password`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...baseUrlHeader(baseUrl) },
       body: JSON.stringify(data),
       cache: "no-store",
     });
@@ -199,7 +210,62 @@ export async function redeemKey(
   }
 }
 
-// ── Admin ─────────────────────────────────────────────────────────────────────
+// ── Account / verification ────────────────────────────────────────────────────
+
+export async function sendVerificationEmail(
+  token: string,
+  baseUrl?: string | null
+): Promise<{ ok: true; message: string } | { ok: false; error: string }> {
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/v1/auth/send-verification`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}`, ...baseUrlHeader(baseUrl) },
+      cache: "no-store",
+    });
+    const body = await res.json();
+    if (res.ok) return { ok: true, message: body.message };
+    return { ok: false, error: body?.detail ?? "Could not send verification email." };
+  } catch {
+    return { ok: false, error: "Network error. Please try again." };
+  }
+}
+
+export async function verifyEmail(
+  verificationToken: string
+): Promise<{ ok: true; message: string } | { ok: false; error: string }> {
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/v1/auth/verify-email`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: verificationToken }),
+      cache: "no-store",
+    });
+    const body = await res.json();
+    if (res.ok) return { ok: true, message: body.message };
+    return { ok: false, error: body?.detail ?? "Invalid or expired verification link." };
+  } catch {
+    return { ok: false, error: "Network error. Please try again." };
+  }
+}
+
+export async function requestAccess(
+  token: string
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/v1/access-requests`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
+    if (res.ok) return { ok: true };
+    const body = await res.json();
+    return { ok: false, error: body?.detail ?? "Could not submit access request." };
+  } catch {
+    return { ok: false, error: "Network error. Please try again." };
+  }
+}
+
+// ── Admin: keys ───────────────────────────────────────────────────────────────
 
 export interface DownloadKey {
   id: number;
@@ -208,6 +274,7 @@ export interface DownloadKey {
   created_at: string;
   used_at: string | null;
   used_by: string | null;
+  assigned_email: string | null;
 }
 
 export interface KeysResponse {
@@ -217,18 +284,52 @@ export interface KeysResponse {
   unused: number;
 }
 
+export interface SearchParams {
+  q?: string;
+  status?: string;
+  limit?: number;
+  offset?: number;
+}
+
+function buildQuery(params: SearchParams): string {
+  const sp = new URLSearchParams();
+  if (params.q) sp.set("q", params.q);
+  if (params.status && params.status !== "all") sp.set("status", params.status);
+  sp.set("limit", String(params.limit ?? 20));
+  sp.set("offset", String(params.offset ?? 0));
+  return sp.toString();
+}
+
 export async function listAdminKeys(
-  token: string
+  token: string,
+  params: SearchParams = {}
 ): Promise<KeysResponse | null> {
   try {
-    const res = await fetch(`${BACKEND_URL}/api/v1/admin/keys`, {
-      headers: { Authorization: `Bearer ${token}` },
-      cache: "no-store",
-    });
+    const res = await fetch(
+      `${BACKEND_URL}/api/v1/admin/keys?${buildQuery(params)}`,
+      { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" }
+    );
     if (!res.ok) return null;
     return res.json();
   } catch {
     return null;
+  }
+}
+
+export async function adminKeySuggestions(
+  token: string,
+  q: string
+): Promise<string[]> {
+  try {
+    const res = await fetch(
+      `${BACKEND_URL}/api/v1/admin/keys/suggestions?q=${encodeURIComponent(q)}`,
+      { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" }
+    );
+    if (!res.ok) return [];
+    const body = await res.json();
+    return body.suggestions ?? [];
+  } catch {
+    return [];
   }
 }
 
@@ -253,22 +354,107 @@ export async function generateAdminKeys(
   }
 }
 
-// ── Terms ─────────────────────────────────────────────────────────────────────
+// ── Admin: access requests ────────────────────────────────────────────────────
 
-export async function agreeToTerms(
-  token: string
-): Promise<{ agreed: boolean } | null> {
+export interface AccessRequestItem {
+  id: number;
+  email: string;
+  name: string;
+  github_id: string;
+  status: AccessRequestStatus;
+  created_at: string;
+  decided_at: string | null;
+  key_id: number | null;
+}
+
+export interface RequestStats {
+  pending: number;
+  granted: number;
+  denied: number;
+  total: number;
+}
+
+export interface RequestsResponse {
+  items: AccessRequestItem[];
+  total: number;
+  limit: number;
+  offset: number;
+  stats: RequestStats;
+}
+
+export async function listAdminRequests(
+  token: string,
+  params: SearchParams = {}
+): Promise<RequestsResponse | null> {
   try {
-    const res = await fetch(`${BACKEND_URL}/api/v1/terms/agree`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${token}` },
-      cache: "no-store",
-    });
-
+    const res = await fetch(
+      `${BACKEND_URL}/api/v1/access-requests?${buildQuery(params)}`,
+      { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" }
+    );
     if (!res.ok) return null;
     return res.json();
   } catch {
     return null;
+  }
+}
+
+export async function adminRequestSuggestions(
+  token: string,
+  q: string
+): Promise<string[]> {
+  try {
+    const res = await fetch(
+      `${BACKEND_URL}/api/v1/access-requests/suggestions?q=${encodeURIComponent(q)}`,
+      { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" }
+    );
+    if (!res.ok) return [];
+    const body = await res.json();
+    return body.suggestions ?? [];
+  } catch {
+    return [];
+  }
+}
+
+export async function grantAdminRequest(
+  token: string,
+  id: number,
+  baseUrl?: string | null
+): Promise<
+  | { ok: true; keyValue: string; emailSent: boolean }
+  | { ok: false; error: string }
+> {
+  try {
+    const res = await fetch(
+      `${BACKEND_URL}/api/v1/access-requests/${id}/grant`,
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, ...baseUrlHeader(baseUrl) },
+        cache: "no-store",
+      }
+    );
+    const body = await res.json();
+    if (res.ok)
+      return { ok: true, keyValue: body.key_value, emailSent: body.email_sent };
+    return { ok: false, error: body?.detail ?? "Could not grant request." };
+  } catch {
+    return { ok: false, error: "Network error. Please try again." };
+  }
+}
+
+export async function denyAdminRequest(
+  token: string,
+  id: number
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    const res = await fetch(
+      `${BACKEND_URL}/api/v1/access-requests/${id}/deny`,
+      { method: "POST", headers: { Authorization: `Bearer ${token}` }, cache: "no-store" }
+    );
+    if (res.ok) return { ok: true };
+    const body = await res.json();
+    return { ok: false, error: body?.detail ?? "Could not deny request." };
+  } catch {
+    return { ok: false, error: "Network error. Please try again." };
   }
 }
 

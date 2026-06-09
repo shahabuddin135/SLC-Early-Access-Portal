@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requestPasswordReset } from "@/lib/api";
+import { baseUrlFromHeaders } from "@/lib/base-url";
 
 export async function POST(req: NextRequest) {
   const data = await req.json();
-  const result = await requestPasswordReset(data);
+  const result = await requestPasswordReset(data, baseUrlFromHeaders(req.headers));
 
   if (result.ok) {
     return NextResponse.json(

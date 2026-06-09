@@ -2,19 +2,48 @@
 
 import { useState } from "react";
 import { downloadAction } from "@/app/actions/download";
-import DownloadWarningDialog from "@/components/DownloadWarningDialog";
+import { capture } from "@/lib/analytics";
 
-type ViewState = "idle" | "warning" | "enter_key" | "loading" | "done";
+type ViewState = "enter_key" | "loading" | "done";
 
 interface DownloadSectionProps {
   hasDownloaded: boolean;
+}
+
+function HeadsUpNote() {
+  return (
+    <div
+      style={{
+        background: "rgba(249,115,22,0.06)",
+        border: "1px solid rgba(249,115,22,0.18)",
+        borderRadius: "var(--radius)",
+        padding: "14px 16px",
+        marginBottom: 20,
+      }}
+    >
+      <p
+        style={{
+          margin: 0,
+          fontSize: "0.8125rem",
+          color: "var(--color-text-muted)",
+          lineHeight: 1.6,
+        }}
+      >
+        <strong style={{ color: "var(--color-text)" }}>Heads up —</strong> the SLC
+        framework is in active early access and is improved every day. While building,
+        you may occasionally need to fix small issues in the framework yourself. If you
+        get stuck, reach out to{" "}
+        <a href="mailto:wewiselabs@gmail.com">wewiselabs@gmail.com</a>.
+      </p>
+    </div>
+  );
 }
 
 export default function DownloadSection({
   hasDownloaded: initialHasDownloaded,
 }: DownloadSectionProps) {
   const [view, setView] = useState<ViewState>(
-    initialHasDownloaded ? "done" : "idle"
+    initialHasDownloaded ? "done" : "enter_key"
   );
   const [key, setKey] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -30,8 +59,8 @@ export default function DownloadSection({
     try {
       const result = await downloadAction(key.trim());
       if (result.ok) {
+        capture("download_started");
         // Open the proxy route in a new tab — auth + token both validated server-side.
-        // The 60-second token window is generous; the new tab opens immediately.
         window.open(
           `/api/download/file?token=${encodeURIComponent(result.downloadToken)}`,
           "_blank",
@@ -50,16 +79,6 @@ export default function DownloadSection({
     }
   }
 
-  /*  Warning dialog — shown before key entry  */
-  if (view === "warning") {
-    return (
-      <DownloadWarningDialog
-        onConfirm={() => setView("enter_key")}
-        onCancel={() => setView("idle")}
-      />
-    );
-  }
-
   /*  Downloaded state  */
   if (view === "done") {
     return (
@@ -70,7 +89,11 @@ export default function DownloadSection({
             &#10003; Downloaded
           </div>
           <button
-            onClick={() => { setKey(""); setError(null); setView("warning"); }}
+            onClick={() => {
+              setKey("");
+              setError(null);
+              setView("enter_key");
+            }}
             className="btn-secondary"
             style={{ width: "auto", alignSelf: "flex-start" }}
           >
@@ -81,33 +104,13 @@ export default function DownloadSection({
     );
   }
 
-  /*  Idle state: show download CTA  */
-  if (view === "idle") {
-    return (
-      <div className="card">
-        <h3 style={{ marginBottom: 8 }}>SLC Language &amp; Framework</h3>
-        <p style={{ fontSize: "0.875rem", marginBottom: 20 }}>
-          Download the SLC framework package to get started.
-          A download key is required — contact{" "}
-          <a href="mailto:wewiselabs@gmail.com">wewiselabs@gmail.com</a>{" "}
-          to obtain yours.
-        </p>
-        <button
-          onClick={() => setView("warning")}
-          className="btn-primary"
-        >
-          Download SLC Language &amp; Framework
-        </button>
-      </div>
-    );
-  }
-
   /*  Key-entry / loading state  */
   return (
     <div className="card">
       <h3 style={{ marginBottom: 8 }}>SLC Language &amp; Framework</h3>
       <p style={{ fontSize: "0.875rem", marginBottom: 4 }}>
-        Enter your download key to access the SLC framework files.
+        Enter the download key from your access-approval email to access the SLC
+        framework files.
       </p>
       <p
         style={{
@@ -116,10 +119,11 @@ export default function DownloadSection({
           marginBottom: 20,
         }}
       >
-        Don&apos;t have a key? Contact{" "}
-        <a href="mailto:wewiselabs@gmail.com">wewiselabs@gmail.com</a>{" "}
-        to obtain your download key.
+        Don&apos;t have a key yet? Request access above, or contact{" "}
+        <a href="mailto:wewiselabs@gmail.com">wewiselabs@gmail.com</a>.
       </p>
+
+      <HeadsUpNote />
 
       <div className="field" style={{ marginBottom: 20 }}>
         <label className="label" htmlFor="download_key">
@@ -129,12 +133,11 @@ export default function DownloadSection({
           id="download_key"
           type="text"
           className="input"
-          placeholder="SLC-XXXX-XXXX-XXXX"
+          placeholder="XXXX-XXXX-XXXX-XXXX"
           value={key}
           onChange={(e) => setKey(e.target.value)}
           disabled={view === "loading"}
           onKeyDown={(e) => e.key === "Enter" && handleDownload()}
-          autoFocus
           autoComplete="off"
           spellCheck={false}
         />
@@ -146,25 +149,14 @@ export default function DownloadSection({
         </p>
       )}
 
-      <div style={{ display: "flex", gap: 12 }}>
-        <button
-          onClick={handleDownload}
-          className="btn-primary"
-          disabled={view === "loading"}
-          style={{ flex: 1 }}
-        >
-          {view === "loading" ? <span className="spinner" /> : null}
-          {view === "loading" ? "Validating" : "Download"}
-        </button>
-        <button
-          onClick={() => { setView("idle"); setError(null); setKey(""); }}
-          className="btn-secondary"
-          disabled={view === "loading"}
-          style={{ width: "auto" }}
-        >
-          Cancel
-        </button>
-      </div>
+      <button
+        onClick={handleDownload}
+        className="btn-primary"
+        disabled={view === "loading"}
+      >
+        {view === "loading" ? <span className="spinner" /> : null}
+        {view === "loading" ? "Validating" : "Download"}
+      </button>
     </div>
   );
 }

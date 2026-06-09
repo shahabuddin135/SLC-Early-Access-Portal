@@ -11,7 +11,15 @@ from slowapi.middleware import SlowAPIMiddleware
 from app.core.config import settings
 from app.core.database import create_db_and_tables
 from app.core.limiter import limiter
-from app.routers import admin, auth, dashboard, download, redeem, review, terms
+from app.routers import (
+    access_request,
+    admin,
+    auth,
+    dashboard,
+    download,
+    redeem,
+    review,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -100,9 +108,9 @@ app.include_router(auth.router, prefix="/api/v1")
 app.include_router(dashboard.router, prefix="/api/v1")
 app.include_router(download.router, prefix="/api/v1")
 app.include_router(review.router, prefix="/api/v1")
-app.include_router(terms.router, prefix="/api/v1")
 app.include_router(redeem.router, prefix="/api/v1")
 app.include_router(admin.router, prefix="/api/v1")
+app.include_router(access_request.router, prefix="/api/v1")
 
 
 # ── Health ────────────────────────────────────────────────────────────────────
