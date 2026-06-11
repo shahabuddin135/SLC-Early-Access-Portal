@@ -10,7 +10,6 @@ import TokenSection from "@/components/landing/TokenSection";
 import SpecGraphSection from "@/components/landing/SpecGraphSection";
 import ProtocolSection from "@/components/landing/ProtocolSection";
 import FolderSection from "@/components/landing/FolderSection";
-import IllustrationBand from "@/components/landing/IllustrationBand";
 import LandingFooter from "@/components/landing/LandingFooter";
 import FlowArt, { FlowSection } from "@/components/story-scroll";
 
@@ -49,8 +48,6 @@ export default function LandingPage() {
         <FolderSection />
         <SpecGraphSection />
         <ProtocolSection />
-
-        <IllustrationBand />
 
         <LandingFooter />
       </SmoothScroll>
