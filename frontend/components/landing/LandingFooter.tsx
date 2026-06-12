@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { SparklesText } from "@/components/ui/sparkles-text";
 
 export default function LandingFooter() {
   const footerRef = useRef<HTMLElement>(null);
@@ -226,6 +227,20 @@ export default function LandingFooter() {
                 >
                   WeWise Labs ↗
                 </a>
+                <Link
+                  href="/testers"
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    fontSize: "0.875rem",
+                    fontWeight: 600,
+                    color: "#FF6B33",
+                    textDecoration: "none",
+                    letterSpacing: "0.01em",
+                    display: "inline-flex",
+                  }}
+                >
+                  <SparklesText text="Our Testers" sparklesCount={7} />
+                </Link>
               </div>
             </div>
           </div>
