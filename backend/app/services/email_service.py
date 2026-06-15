@@ -1,6 +1,7 @@
 import asyncio
 import logging
 from datetime import datetime, timezone
+from urllib.parse import urlsplit, urlunsplit
 
 import resend
 
@@ -443,6 +444,10 @@ async def send_access_key_email(
     if not settings.resend_enabled:
         return False
 
+    # Documentation lives at /docs on the same origin as the dashboard.
+    origin = urlsplit(dashboard_url)
+    docs_url = urlunsplit((origin.scheme, origin.netloc, "/docs", "", ""))
+
     subject = "You're in! Your SLC access key is ready"
     text = (
         f"Hi {name},\n\n"
@@ -450,6 +455,7 @@ async def send_access_key_email(
         f"Your one-time access key:\n{key_value}\n\n"
         "Open your dashboard to reveal and copy it in one tap, then download the framework:\n"
         f"{dashboard_url}\n\n"
+        f"New to SLC? Read the docs to get started:\n{docs_url}\n\n"
         "This key is tied to your account and can only be redeemed by you."
     )
     html = _branded_email(
@@ -474,7 +480,7 @@ async def send_access_key_email(
         help_title="Need help getting started?",
         help_text="Check out our docs or reply to this email.",
         help_cta_label="View Documentation",
-        help_cta_url=dashboard_url,
+        help_cta_url=docs_url,
         signoff_lead="Let's build the inevitable,",
         note_html=(
             "This email contains important information about your SLC access. "

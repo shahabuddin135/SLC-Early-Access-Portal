@@ -12,9 +12,11 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440
     PASSWORD_RESET_TOKEN_EXPIRE_MINUTES: int = 60
     EMAIL_VERIFICATION_TOKEN_EXPIRE_MINUTES: int = 1440
-    # FRONTEND_URL is optional — in production, rely on X-Forwarded-Host header
-    # Only used as fallback if env var is explicitly set
-    FRONTEND_URL: str = ""
+    # Canonical public site URL. Emailed links (verify, reset, dashboard, docs)
+    # prefer the per-request X-App-Base-Url header so previews/custom domains adapt
+    # automatically; this is the fallback used when that header is absent — so links
+    # never degrade to localhost in a deployed environment. Override per env.
+    FRONTEND_URL: str = "https://slc-early-access-portal.vercel.app"
     # Extra comma-separated hostnames allowed in emailed links (besides FRONTEND_URL's
     # host, *.vercel.app and localhost). Usually unnecessary.
     ALLOWED_REDIRECT_HOSTS: str = ""

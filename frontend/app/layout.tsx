@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono, Noto_Nastaliq_Urdu } from "next/font/google";
 import "./globals.css";
 import { PostHogProvider } from "./providers";
 
@@ -14,6 +14,15 @@ const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
   weight: ["400", "500", "700"],
   variable: "--font-mono",
+  display: "swap",
+});
+
+// Self-hosted by next/font (served from our origin) so the strict
+// `font-src 'self'` CSP is satisfied. Used for Urdu (RTL) documentation.
+const notoNastaliqUrdu = Noto_Nastaliq_Urdu({
+  subsets: ["arabic"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-urdu",
   display: "swap",
 });
 
@@ -57,7 +66,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${jetbrainsMono.variable}`}
+      className={`${inter.variable} ${jetbrainsMono.variable} ${notoNastaliqUrdu.variable}`}
     >
       <body>
         <PostHogProvider>{children}</PostHogProvider>

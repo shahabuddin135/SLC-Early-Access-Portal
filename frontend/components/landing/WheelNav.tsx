@@ -12,6 +12,7 @@ const LINKS = [
   { label: "Syntax",    href: "#syntax",    num: "01" },
   { label: "Framework", href: "#framework", num: "02" },
   { label: "Protocol",  href: "#protocol",  num: "03" },
+  { label: "Docs",      href: "/docs",      num: "04" },
 ];
 
 // ── Component ────────────────────────────────────────────────────────────────
@@ -276,7 +277,8 @@ export default function WheelNav() {
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                marginBottom: "clamp(44px, 8vh, 80px)",
+                marginBottom: "clamp(18px, 4vh, 48px)",
+                flexShrink: 0,
               }}
             >
               <span
@@ -327,41 +329,33 @@ export default function WheelNav() {
               </button>
             </div>
 
-            {/* Nav links */}
-            <div ref={linksRef} style={{ flex: 1 }}>
-              {LINKS.map(({ label, href, num }) => (
-                <div
-                  key={label}
-                  className="nav-item"
-                  style={{
-                    opacity: 0,
-                    borderBottom: "1px solid #111",
-                  }}
-                >
-                  <a
-                    href={href}
-                    onClick={closeNav}
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      padding: "clamp(12px,2.4vh,20px) 0",
-                      textDecoration: "none",
-                      fontFamily: "var(--font-display)",
-                      fontWeight: 100,
-                      fontSize: "clamp(2.8rem, 6vw, 6.5rem)",
-                      color: "#D8D4CC",
-                      letterSpacing: "-0.045em",
-                      lineHeight: 1,
-                      transition: "color 0.2s ease",
-                    }}
-                    onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLAnchorElement).style.color = "#FF4500";
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLAnchorElement).style.color = "#D8D4CC";
-                    }}
-                  >
+            {/* Nav links — scrollable if the list is taller than the panel */}
+            <div ref={linksRef} style={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
+              {LINKS.map(({ label, href, num }) => {
+                const isRoute = href.startsWith("/");
+                const linkStyle: React.CSSProperties = {
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "clamp(6px, 1.3vh, 14px) 0",
+                  textDecoration: "none",
+                  fontFamily: "var(--font-display)",
+                  fontWeight: 100,
+                  // Height-aware so the full list always fits the viewport.
+                  fontSize: "clamp(1.7rem, 5.4vh, 3.6rem)",
+                  color: "#D8D4CC",
+                  letterSpacing: "-0.045em",
+                  lineHeight: 1.05,
+                  transition: "color 0.2s ease",
+                };
+                const onEnter = (e: React.MouseEvent<HTMLAnchorElement>) => {
+                  e.currentTarget.style.color = "#FF4500";
+                };
+                const onLeave = (e: React.MouseEvent<HTMLAnchorElement>) => {
+                  e.currentTarget.style.color = "#D8D4CC";
+                };
+                const inner = (
+                  <>
                     <span>{label}</span>
                     <span
                       style={{
@@ -375,16 +369,36 @@ export default function WheelNav() {
                     >
                       {num}
                     </span>
-                  </a>
-                </div>
-              ))}
+                  </>
+                );
+                return (
+                  <div
+                    key={label}
+                    className="nav-item"
+                    style={{
+                      opacity: 0,
+                      borderBottom: "1px solid #111",
+                    }}
+                  >
+                    {isRoute ? (
+                      <Link href={href} onClick={closeNav} style={linkStyle} onMouseEnter={onEnter} onMouseLeave={onLeave}>
+                        {inner}
+                      </Link>
+                    ) : (
+                      <a href={href} onClick={closeNav} style={linkStyle} onMouseEnter={onEnter} onMouseLeave={onLeave}>
+                        {inner}
+                      </a>
+                    )}
+                  </div>
+                );
+              })}
 
               {/* Auth links */}
               <div
                 className="nav-item"
                 style={{
                   opacity: 0,
-                  marginTop: "clamp(28px,5vh,48px)",
+                  marginTop: "clamp(16px, 3vh, 32px)",
                   display: "flex",
                   flexDirection: "column",
                   gap: "12px",

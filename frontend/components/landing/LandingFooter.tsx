@@ -162,6 +162,18 @@ export default function LandingFooter() {
                 Learn
               </p>
               <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                <Link
+                  href="/docs"
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    fontSize: "0.875rem",
+                    color: "#D6D1C8",
+                    textDecoration: "none",
+                    letterSpacing: "0.01em",
+                  }}
+                >
+                  Documentation
+                </Link>
                 {[
                   { label: "Framework", href: "#framework" },
                   { label: "Token Optimization", href: "#tokens" },
