@@ -42,11 +42,11 @@ def _hl(text: str) -> str:
     )
 
 
-def _icon_cell(glyph: str, *, size: int = 40) -> str:
+def _icon_cell(glyph: str, *, size: int = 40, cls: str = "icon-sq") -> str:
     """A small rounded square holding a monochrome orange glyph."""
     return (
         f'<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>'
-        f'<td width="{size}" height="{size}" align="center" valign="middle" '
+        f'<td class="{cls}" width="{size}" height="{size}" align="center" valign="middle" '
         f'style="width:{size}px;height:{size}px;background:rgba(255,107,51,0.10);'
         f'border:1px solid rgba(255,107,51,0.22);border-radius:9px;'
         f"font-family:'SF Mono','Courier New',monospace;font-size:16px;font-weight:700;"
@@ -83,11 +83,11 @@ def _branded_email(
     # ── Hero CTA (square button) ───────────────────────────────────────────
     hero_cta = (
         f"""
-                <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:22px 0 4px;">
+                <table role="presentation" class="hero-cta" cellpadding="0" cellspacing="0" border="0" style="margin:22px 0 4px;">
                   <tr>
                     <td align="center" bgcolor="{_ORANGE}" style="background:{_ORANGE};">
                       <a href="{cta_url}" style="display:inline-block;padding:13px 26px;
-                         font-size:12.5px;font-weight:700;letter-spacing:0.10em;text-transform:uppercase;
+                         font-size:12.5px;font-weight:700;letter-spacing:0.10em;text-transform:uppercase;white-space:nowrap;
                          color:#ffffff;text-decoration:none;font-family:'Helvetica Neue',Arial,sans-serif;">
                         {cta_label} &nbsp;&rarr;
                       </a>
@@ -107,15 +107,15 @@ def _branded_email(
             cells += f"""
                   <td width="{col_w}%" valign="middle" style="padding:4px 0;">
                     <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
-                      <td valign="middle" style="padding-right:12px;">{_icon_cell(glyph)}</td>
+                      <td class="icon-pad" valign="middle" style="padding-right:12px;">{_icon_cell(glyph)}</td>
                       <td valign="middle">
-                        <div style="font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#7C7C84;">{label}</div>
-                        <div style="font-size:14px;font-weight:500;color:#F2F2F4;margin-top:3px;word-break:break-word;">{value}</div>
+                        <div class="detail-lbl" style="font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#7C7C84;">{label}</div>
+                        <div class="detail-val" style="font-size:14px;font-weight:500;color:#F2F2F4;margin-top:3px;word-break:break-word;">{value}</div>
                       </td>
                     </tr></table>
                   </td>"""
         detail_block = f"""
-              <p style="margin:0 0 16px;font-size:11px;font-weight:700;letter-spacing:0.18em;
+              <p class="sec-label" style="margin:0 0 16px;font-size:11px;font-weight:700;letter-spacing:0.18em;
                         text-transform:uppercase;color:{_ORANGE_SOFT};">Your Access Details</p>
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 28px;">
                 <tr>{cells}</tr>
@@ -127,13 +127,13 @@ def _branded_email(
         key_block = f"""
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 28px;">
                 <tr>
-                  <td align="center" style="
+                  <td class="key-box" align="center" style="
                     background:radial-gradient(ellipse 90% 120% at 50% 0%, rgba(255,69,0,0.16) 0%, transparent 70%), #0C0C0C;
                     border:1px solid rgba(255,69,0,0.30);border-radius:12px;padding:20px 18px;">
-                    <div style="font-size:10px;font-weight:700;letter-spacing:0.20em;text-transform:uppercase;color:#7C7C84;margin-bottom:11px;">
+                    <div class="sec-label" style="font-size:10px;font-weight:700;letter-spacing:0.20em;text-transform:uppercase;color:#7C7C84;margin-bottom:11px;">
                       Your Access Key
                     </div>
-                    <div style="font-size:22px;font-weight:600;letter-spacing:0.12em;color:{_ORANGE_SOFT};
+                    <div class="key-val" style="font-size:22px;font-weight:600;letter-spacing:0.12em;color:{_ORANGE_SOFT};
                                 font-family:'SF Mono','Courier New',monospace;word-break:break-all;">
                       {key_value}
                     </div>
@@ -153,15 +153,15 @@ def _branded_email(
             border = "border-left:1px solid #1C1C1C;" if i > 0 else ""
             pad = "padding:0 16px;" if i > 0 else "padding:0 16px 0 0;"
             cells += f"""
-                  <td width="{col_w}%" valign="top" style="{border}{pad}">
+                  <td class="step-cell" width="{col_w}%" valign="top" style="{border}{pad}">
                     {_icon_cell(glyph, size=38)}
-                    <div style="font-size:14px;font-weight:600;color:#F2F2F4;margin:14px 0 6px;">{s_title}</div>
-                    <div style="font-size:12.5px;line-height:1.55;color:#8A8A93;">{s_desc}</div>
+                    <div class="step-title" style="font-size:14px;font-weight:600;color:#F2F2F4;margin:14px 0 6px;">{s_title}</div>
+                    <div class="step-desc" style="font-size:12.5px;line-height:1.55;color:#8A8A93;">{s_desc}</div>
                   </td>"""
         steps_block = f"""
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:6px 0 4px;">
                 <tr><td style="border-top:1px solid #1C1C1C;padding-top:26px;">
-                  <p style="margin:0 0 20px;font-size:11px;font-weight:700;letter-spacing:0.18em;
+                  <p class="sec-label" style="margin:0 0 20px;font-size:11px;font-weight:700;letter-spacing:0.18em;
                             text-transform:uppercase;color:{_ORANGE_SOFT};">Get Started</p>
                   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                     <tr>{cells}</tr>
@@ -173,7 +173,7 @@ def _branded_email(
     help_block = ""
     if help_title:
         help_cta = (
-            f"""<a href="{help_cta_url}" style="font-size:11.5px;font-weight:700;letter-spacing:0.10em;
+            f"""<a href="{help_cta_url}" class="help-cta" style="font-size:11.5px;font-weight:700;letter-spacing:0.10em;
                    text-transform:uppercase;color:{_ORANGE_SOFT};text-decoration:none;white-space:nowrap;">
                    {help_cta_label} &nbsp;&rarr;</a>"""
             if help_cta_label and help_cta_url
@@ -182,18 +182,18 @@ def _branded_email(
         help_block = f"""
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:28px 0 4px;">
                 <tr>
-                  <td style="background:#141414;border:1px solid #1F1F1F;border-radius:14px;padding:18px 20px;">
+                  <td class="help-box" style="background:#141414;border:1px solid #1F1F1F;border-radius:14px;padding:18px 20px;">
                     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
-                      <td width="44" valign="middle" style="padding-right:14px;">
+                      <td class="help-icon-cell" width="44" valign="middle" style="padding-right:14px;">
                         <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
-                          <td width="44" height="44" align="center" valign="middle"
+                          <td class="help-icon" width="44" height="44" align="center" valign="middle"
                               style="width:44px;height:44px;background:{_ORANGE};border-radius:10px;
                                      font-size:18px;line-height:1;color:#ffffff;">&#10022;</td>
                         </tr></table>
                       </td>
                       <td valign="middle">
-                        <div style="font-size:14.5px;font-weight:600;color:#F2F2F4;">{help_title}</div>
-                        <div style="font-size:12.5px;line-height:1.5;color:#8A8A93;margin-top:3px;">{help_text or ""}</div>
+                        <div class="help-title" style="font-size:14.5px;font-weight:600;color:#F2F2F4;">{help_title}</div>
+                        <div class="help-text" style="font-size:12.5px;line-height:1.5;color:#8A8A93;margin-top:3px;">{help_text or ""}</div>
                       </td>
                       <td valign="middle" align="right" style="padding-left:14px;">{help_cta}</td>
                     </tr></table>
@@ -206,11 +206,11 @@ def _branded_email(
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:32px 0 6px;">
                 <tr>
                   <td valign="bottom">
-                    <div style="font-size:14px;color:#A8AAB3;">{signoff_lead}</div>
-                    <div style="font-size:14px;font-weight:600;color:{_ORANGE_SOFT};margin-top:4px;">&mdash; The SLC Team</div>
+                    <div class="signoff-lead" style="font-size:14px;color:#A8AAB3;">{signoff_lead}</div>
+                    <div class="signoff-name" style="font-size:14px;font-weight:600;color:{_ORANGE_SOFT};margin-top:4px;">&mdash; The SLC Team</div>
                   </td>
                   <td valign="bottom" align="right">
-                    <span style="font-family:'Segoe Script','Brush Script MT',cursive;font-size:19px;color:{_ORANGE_SOFT};">
+                    <span class="signoff-script" style="font-family:'Segoe Script','Brush Script MT',cursive;font-size:19px;color:{_ORANGE_SOFT};">
                       &#9829; Happy Coding!
                     </span>
                   </td>
@@ -232,6 +232,45 @@ def _branded_email(
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="x-apple-disable-message-reformatting" />
 <title>SLC Framework</title>
+<style>
+  /* Mobile: keep the multi-column layout but scale type + padding down so it
+     fills the screen cleanly instead of being auto-zoomed to a tiny mess. */
+  @media only screen and (max-width:600px) {{
+    .container {{ width:100% !important; }}
+    .card {{ border-radius:16px !important; }}
+    .hdr-pad {{ padding:4px 4px 16px !important; }}
+    .hdr-tag {{ font-size:9.5px !important; }}
+    .hero-l {{ padding:22px 4px 22px 18px !important; }}
+    .hero-r {{ padding:14px 10px 8px 0 !important; }}
+    .hero-h1 {{ font-size:21px !important; line-height:1.16 !important; }}
+    .hero-p {{ font-size:12.5px !important; margin-top:10px !important; }}
+    .hero-img {{ max-width:124px !important; }}
+    .hero-badge {{ font-size:9px !important; padding:4px 10px !important; }}
+    .hero-cta a {{ padding:12px 20px !important; font-size:11.5px !important; }}
+    .body-pad {{ padding:22px 16px 20px !important; }}
+    .sec-label {{ font-size:9.5px !important; letter-spacing:0.12em !important; }}
+    .icon-sq {{ width:30px !important; height:30px !important; font-size:13px !important; }}
+    .icon-pad {{ padding-right:9px !important; }}
+    .detail-lbl {{ font-size:8.5px !important; letter-spacing:0.10em !important; }}
+    .detail-val {{ font-size:11.5px !important; }}
+    .key-box {{ padding:16px 10px !important; }}
+    .key-val {{ font-size:15px !important; letter-spacing:0.04em !important; }}
+    .step-cell {{ padding:0 6px !important; }}
+    .step-title {{ font-size:11.5px !important; margin:10px 0 4px !important; }}
+    .step-desc {{ font-size:10px !important; line-height:1.42 !important; }}
+    .help-box {{ padding:14px 12px !important; }}
+    .help-icon-cell {{ width:34px !important; padding-right:10px !important; }}
+    .help-icon {{ width:34px !important; height:34px !important; font-size:14px !important; }}
+    .help-title {{ font-size:12.5px !important; }}
+    .help-text {{ font-size:10.5px !important; }}
+    .help-cta {{ font-size:9.5px !important; padding-left:8px !important; }}
+    .signoff-lead, .signoff-name {{ font-size:12.5px !important; }}
+    .signoff-script {{ font-size:15px !important; }}
+    .foot-pad-a {{ padding:20px 16px 6px !important; }}
+    .foot-pad-b {{ padding:12px 16px 20px !important; }}
+    .foot-txt {{ font-size:10px !important; }}
+  }}
+</style>
 </head>
 <body style="margin:0;padding:0;background:#0A0A0A;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#0A0A0A;">
@@ -239,16 +278,16 @@ def _branded_email(
       <td align="center" style="padding:30px 14px 44px;">
 
         <!--[if mso]><table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->
-        <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px;max-width:600px;">
+        <table role="presentation" class="container" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px;">
 
           <!-- ══ HEADER ══ -->
           <tr>
-            <td style="padding:6px 6px 20px;">
+            <td class="hdr-pad" style="padding:6px 6px 20px;">
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                 <tr>
                   <td valign="middle" style="font-family:'SF Mono','Courier New',monospace;font-size:17px;font-weight:700;
                              letter-spacing:0.10em;color:{_ORANGE};">{{&nbsp;S&nbsp;L&nbsp;C&nbsp;}}</td>
-                  <td valign="middle" align="right" style="font-size:11.5px;color:#6B6B73;letter-spacing:0.02em;">
+                  <td class="hdr-tag" valign="middle" align="right" style="font-size:11.5px;color:#6B6B73;letter-spacing:0.02em;">
                     The world&rsquo;s first spec-native language
                   </td>
                 </tr>
@@ -258,28 +297,28 @@ def _branded_email(
 
           <!-- ══ CARD ══ -->
           <tr>
-            <td style="background:#0E0E0E;border-radius:22px;overflow:hidden;
+            <td class="card" style="background:#0E0E0E;border-radius:22px;overflow:hidden;
                        box-shadow:0 0 0 1px rgba(255,255,255,0.05), 0 40px 90px rgba(0,0,0,0.7);">
 
               <!-- ── Hero card (cream, mascot on the right) ── -->
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
                      style="background:linear-gradient(135deg,#F8E7D6 0%, #F4DCC6 55%, #F1D2B8 100%);">
                 <tr>
-                  <td width="58%" valign="middle" style="padding:34px 8px 34px 34px;">
+                  <td class="hero-l" width="58%" valign="middle" style="padding:34px 8px 34px 34px;">
                     <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 16px;">
-                      <tr><td style="border:1px solid rgba(255,69,0,0.45);border-radius:999px;padding:5px 13px;
+                      <tr><td class="hero-badge" style="border:1px solid rgba(255,69,0,0.45);border-radius:999px;padding:5px 13px;
                                      font-size:10.5px;font-weight:700;letter-spacing:0.10em;text-transform:uppercase;color:{_ORANGE};">
                         &#10003;&nbsp; {badge}
                       </td></tr>
                     </table>
-                    <h1 style="margin:0;font-size:30px;line-height:1.12;font-weight:300;letter-spacing:-0.02em;color:#1A1208;">
+                    <h1 class="hero-h1" style="margin:0;font-size:30px;line-height:1.12;font-weight:300;letter-spacing:-0.02em;color:#1A1208;">
                       {title_html}
                     </h1>
-                    <p style="margin:14px 0 0;font-size:14px;line-height:1.6;color:#6B5E50;">{intro_html}</p>
+                    <p class="hero-p" style="margin:14px 0 0;font-size:14px;line-height:1.6;color:#6B5E50;">{intro_html}</p>
                     {hero_cta}
                   </td>
-                  <td width="42%" valign="middle" align="center" style="padding:18px 18px 10px 0;">
-                    <img src="{illustration}" width="200" alt=""
+                  <td class="hero-r" width="42%" valign="middle" align="center" style="padding:18px 18px 10px 0;">
+                    <img src="{illustration}" width="200" alt="" class="hero-img"
                          style="display:block;width:100%;max-width:200px;height:auto;
                                 filter:drop-shadow(0 16px 28px rgba(180,80,20,0.30));" />
                   </td>
@@ -289,7 +328,7 @@ def _branded_email(
               <!-- ── Body ── -->
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#0E0E0E;">
                 <tr>
-                  <td style="padding:34px 34px 30px;">
+                  <td class="body-pad" style="padding:34px 34px 30px;">
                     {detail_block}
                     {key_block}
                     {steps_block}
@@ -302,7 +341,7 @@ def _branded_email(
               <!-- ── Footer ── -->
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#0A0A0A;border-top:1px solid #161616;">
                 <tr>
-                  <td style="padding:24px 34px 8px;">
+                  <td class="foot-pad-a" style="padding:24px 34px 8px;">
                     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                       <tr>
                         <td valign="top">
@@ -319,11 +358,11 @@ def _branded_email(
                   </td>
                 </tr>
                 <tr>
-                  <td style="padding:14px 34px 22px;">
+                  <td class="foot-pad-b" style="padding:14px 34px 22px;">
                     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                       <tr><td style="height:1px;background:#161616;line-height:1px;font-size:0;">&nbsp;</td></tr>
                     </table>
-                    <p style="margin:16px 0 0;font-size:11px;line-height:1.6;color:#4A4A52;text-align:center;">
+                    <p class="foot-txt" style="margin:16px 0 0;font-size:11px;line-height:1.6;color:#4A4A52;text-align:center;">
                       &#128274;&nbsp; {disclaimer}
                     </p>
                   </td>
