@@ -88,8 +88,8 @@ export default function CompatibilitySection() {
             color: "#F0EEE9", lineHeight: 1.08, margin: "0 0 20px", maxWidth: "16em",
           }}
         >
-          Not a tool you switch to.{" "}
-          <span style={{ color: "#FF4500" }}>A format your agent already reads.</span>
+          Your agent is the runtime.{" "}
+          <span style={{ color: "#FF4500" }}>SLC is the framework it runs.</span>
         </h2>
         <p
           className="cmp-reveal"
@@ -100,8 +100,9 @@ export default function CompatibilitySection() {
             lineHeight: 1.6, margin: 0, maxWidth: "40em",
           }}
         >
-          SLC is plain spec files. Anything that can open a file can run it — and in agentic editors
-          with MCP, it runs at full power.
+          SLC doesn&apos;t replace the tool you already use — it directs it. The same framework drops
+          into Claude Code, Cursor, Copilot, Codex or Antigravity and turns each one from a vibe-coder
+          into a deterministic engineer.
         </p>
       </div>
 

@@ -11,12 +11,17 @@ import SpecGraphSection from "@/components/landing/SpecGraphSection";
 import ProtocolSection from "@/components/landing/ProtocolSection";
 import FolderSection from "@/components/landing/FolderSection";
 import CompatibilitySection from "@/components/landing/CompatibilitySection";
-import ProofSection from "@/components/landing/ProofSection";
+import ReviewsSection from "@/components/landing/ReviewsSection";
 import ComparisonSection from "@/components/landing/ComparisonSection";
 import LandingFooter from "@/components/landing/LandingFooter";
 import FlowArt, { FlowSection } from "@/components/story-scroll";
+import { MOCK_REVIEWS } from "@/lib/mock-reviews";
 
 export default function LandingPage() {
+  // Showing curated reviews until real post-launch reviews accumulate. To go live,
+  // swap MOCK_REVIEWS for `await getPublicReviews()` (and make this async again).
+  const reviews = MOCK_REVIEWS;
+
   return (
     <>
       <Cursor />
@@ -50,8 +55,8 @@ export default function LandingPage() {
           </FlowSection>
         </FlowArt>
 
-        {/* Proven in production — and why the token math holds by architecture */}
-        <ProofSection />
+        {/* Builder Archive — real reviews from key-holders who shipped with SLC */}
+        <ReviewsSection reviews={reviews} />
 
         {/* Standalone: complex scroll animations */}
         <FolderSection />

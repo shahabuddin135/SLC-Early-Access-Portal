@@ -198,7 +198,7 @@ export default function WheelNav() {
           <motion.g
             animate={{ rotate: 360 }}
             transition={{ duration: 14, repeat: Infinity, ease: "linear" }}
-            style={{ transformOrigin: "30px 30px" }}
+            style={{ transformOrigin: "43px 43px" }}
           >
             <text
               fill="rgba(255,255,255,1)"
@@ -211,7 +211,7 @@ export default function WheelNav() {
           </motion.g>
         </svg>
 
-        {/* Layer 2 — orange NAV label, no blend, always readable */}
+        {/* Layer 2 — burger icon, centred, always readable */}
         <div
           style={{
             position: "absolute",
@@ -222,20 +222,11 @@ export default function WheelNav() {
             pointerEvents: "none",
           }}
         >
-          <span
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: "0.5rem",
-              letterSpacing: "0.28em",
-              color: "#FFFFFF",
-              textTransform: "uppercase",
-              fontWeight: 600,
-              userSelect: "none",
-              paddingLeft: "0.28em",
-            }}
-          >
-            NAV
-          </span>
+          <svg width="22" height="14" viewBox="0 0 22 14" fill="none" aria-hidden>
+            <line x1="1" y1="1.5" x2="21" y2="1.5" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" />
+            <line x1="1" y1="7"   x2="21" y2="7"   stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" />
+            <line x1="1" y1="12.5" x2="21" y2="12.5" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" />
+          </svg>
         </div>
       </div>
 

@@ -4,10 +4,35 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_session
 from app.dependencies.auth import get_current_user
 from app.models.user import User
-from app.schemas.review import ReviewRequest, ReviewResponse
-from app.services.review_service import submit_review
+from app.schemas.review import (
+    PublicReview,
+    ReviewByKeyRequest,
+    ReviewByKeyResponse,
+    ReviewRequest,
+    ReviewResponse,
+)
+from app.services.review_service import (
+    list_public_reviews,
+    submit_review,
+    submit_review_by_key,
+)
 
 router = APIRouter(tags=["review"])
+
+
+@router.get("/reviews", response_model=list[PublicReview])
+async def get_reviews(session: AsyncSession = Depends(get_session)):
+    """Public — powers the Builder Archive on the landing page."""
+    return await list_public_reviews(session=session)
+
+
+@router.post("/reviews/by-key", response_model=ReviewByKeyResponse, status_code=201)
+async def create_review_by_key(
+    data: ReviewByKeyRequest,
+    session: AsyncSession = Depends(get_session),
+):
+    """Public — submit a review using a download key instead of logging in."""
+    return await submit_review_by_key(data=data, session=session)
 
 
 @router.post("/review", response_model=ReviewResponse, status_code=201)

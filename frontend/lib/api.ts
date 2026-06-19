@@ -460,6 +460,56 @@ export async function denyAdminRequest(
 
 // ── Review ────────────────────────────────────────────────────────────────────
 
+export interface PublicReview {
+  id: number;
+  name: string;
+  github_id: string;
+  project_link: string;
+  review_text: string;
+  submitted_at: string;
+}
+
+// Public — powers the Builder Archive on the landing page. Fetched server-side
+// in the landing page component; returns [] if the backend is unreachable so the
+// section degrades to its empty state rather than throwing.
+export async function getPublicReviews(): Promise<PublicReview[]> {
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/v1/reviews`, {
+      next: { revalidate: 120 },
+    });
+    if (!res.ok) return [];
+    return res.json();
+  } catch {
+    return [];
+  }
+}
+
+// No-login submission — the download key identifies the author. Powers the
+// "add review" flow in the Builder Archive.
+export async function submitReviewByKey(data: {
+  key_value: string;
+  project_link: string;
+  review_text: string;
+}): Promise<{ ok: true; name: string } | { ok: false; error: string }> {
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/v1/reviews/by-key`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+      cache: "no-store",
+    });
+    const body = await res.json();
+    if (res.ok) return { ok: true, name: body.name };
+    const message =
+      typeof body?.detail === "string"
+        ? body.detail
+        : "Could not submit your review. Please check your details and try again.";
+    return { ok: false, error: message };
+  } catch {
+    return { ok: false, error: "Network error. Please try again." };
+  }
+}
+
 export async function submitReview(
   token: string,
   data: { project_link: string; review_text: string }

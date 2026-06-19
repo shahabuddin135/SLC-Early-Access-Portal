@@ -2,6 +2,7 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -80,9 +81,11 @@ async def http_exception_handler(request: Request, exc: HTTPException):
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    # jsonable_encoder is required: in Pydantic v2 exc.errors() embeds the original
+    # exception object (e.g. ValueError) in `ctx`, which is not JSON-serializable.
     return JSONResponse(
         status_code=422,
-        content={"detail": "Validation error", "errors": exc.errors()},
+        content={"detail": "Validation error", "errors": jsonable_encoder(exc.errors())},
     )
 
 
