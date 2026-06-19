@@ -9,10 +9,12 @@ const CIRCLE_TEXT = "NAV  ·  CIRCLE  ·  NAV  ·  CIRCLE  ·  NAV  ·  CIRCLE  
 
 // ── Nav data ─────────────────────────────────────────────────────────────────
 const LINKS = [
-  { label: "Syntax",    href: "#syntax",    num: "01" },
-  { label: "Framework", href: "#framework", num: "02" },
-  { label: "Protocol",  href: "#protocol",  num: "03" },
-  { label: "Docs",      href: "/docs",      num: "04" },
+  { label: "Syntax",     href: "#syntax",        num: "01" },
+  { label: "Framework",  href: "#framework",     num: "02" },
+  { label: "Compatible", href: "#compatibility", num: "03" },
+  { label: "Compare",    href: "#compare",       num: "04" },
+  { label: "Protocol",   href: "#protocol",      num: "05" },
+  { label: "Docs",       href: "/docs",          num: "06" },
 ];
 
 // ── Component ────────────────────────────────────────────────────────────────
