@@ -4,6 +4,7 @@ import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ShaderAnimation } from "@/components/shader-lines";
+import InstallCommand from "@/components/landing/InstallCommand";
 
 const MANIFESTO = ["Spec first.", "Code second.", "Memory anchored.", "No drift.", "That’s SLC."];
 
@@ -111,25 +112,9 @@ export default function ProtocolSection() {
             className="verdict-ctas"
             style={{ display: "flex", gap: "16px", alignItems: "center", flexWrap: "wrap", opacity: 0 }}
           >
+            <InstallCommand command="npx @wewise/slc" />
             <Link
-              href="/register"
-              style={{
-                fontFamily: "var(--font-sans)",
-                fontWeight: 700,
-                fontSize: "0.85rem",
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
-                color: "#0A0A0A",
-                background: "#FF4500",
-                padding: "16px 40px",
-                textDecoration: "none",
-                display: "inline-block",
-              }}
-            >
-              Request Access
-            </Link>
-            <Link
-              href="/login"
+              href="/docs"
               style={{
                 fontFamily: "var(--font-sans)",
                 fontWeight: 600,
@@ -143,7 +128,7 @@ export default function ProtocolSection() {
                 display: "inline-block",
               }}
             >
-              Sign in
+              Read the docs
             </Link>
           </div>
         </div>

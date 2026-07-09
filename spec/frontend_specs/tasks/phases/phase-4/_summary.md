@@ -5,7 +5,7 @@
 priority: high
 intent: "Frontend Phase 4 overview — Review Submission"
 scope: phase-4
-depends_on: [fe_phase_3]
+depends_on: [fe_phase_3_summary]
 
 content:
   name: "Review"

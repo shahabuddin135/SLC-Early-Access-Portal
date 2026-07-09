@@ -5,6 +5,7 @@ import Link from "next/link";
 import gsap from "gsap";
 import { LayoutGroup, motion, AnimatePresence } from "motion/react";
 import TextRotate from "@/components/fancy/text/text-rotate";
+import InstallCommand from "@/components/landing/InstallCommand";
 
 const ROTATING_WORDS = [
   "inevitable.",
@@ -135,7 +136,7 @@ export default function HeroWhite() {
               whiteSpace: "nowrap",
             }}
           >
-            WeWise Labs &middot; Early Access
+            WeWise Labs &middot; npx @wewise/slc
           </span>
         </div>
 
@@ -232,7 +233,8 @@ export default function HeroWhite() {
               }}
             >
               SLC is the world&apos;s first token-efficient, spec-native language for cognition.
-              Two files. Every AI session reads them first. No re-explaining. No drift. No wasted context.
+              One command turns your requirements into a validated spec tree; your own AI builds from it.
+              No re-explaining. No drift. No wasted context.
             </p>
 
             {/* CTAs */}
@@ -244,31 +246,11 @@ export default function HeroWhite() {
                 marginTop: "clamp(24px, 3vw, 40px)",
               }}
             >
+              <span className="hero-cta" style={{ opacity: 0, display: "inline-block" }}>
+                <InstallCommand command="npx @wewise/slc" />
+              </span>
               <Link
-                href="/register"
-                className="hero-cta"
-                style={{
-                  opacity: 0,
-                  fontFamily: "var(--font-sans)",
-                  fontWeight: 600,
-                  fontSize: "clamp(0.66rem, 1.3vw, 0.85rem)",
-                  letterSpacing: "0.08em",
-                  color: "#FFFFFF",
-                  background: "#FF4500",
-                  padding: "clamp(11px, 1.5vw, 15px) clamp(20px, 2.6vw, 34px)",
-                  textDecoration: "none",
-                  textTransform: "uppercase",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "0.7em",
-                  whiteSpace: "nowrap",
-                  boxShadow: "0 14px 30px rgba(255,69,0,0.28)",
-                }}
-              >
-                Request access <span aria-hidden>&rarr;</span>
-              </Link>
-              <a
-                href="#syntax"
+                href="/docs"
                 className="hero-cta"
                 style={{
                   opacity: 0,
@@ -282,8 +264,8 @@ export default function HeroWhite() {
                   whiteSpace: "nowrap",
                 }}
               >
-                See how it works
-              </a>
+                Read the docs &rarr;
+              </Link>
             </div>
           </div>
 

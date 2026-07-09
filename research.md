@@ -359,8 +359,9 @@ real-world use today.
 
 ## 6. Scored Evaluation (1–5, higher better)
 
-Weighted across the dimensions a research evaluator would use. Scores reflect *current reality*
-(June 2026), not potential.
+Weighted across the dimensions a research evaluator would use. Scores **re-scored 2026-07-01**, after
+SLC shipped a one-command CLI (`npx @wewise/slc`) and a reference validator (`slc doctor`). The June
+2026 values are shown in parentheses where they changed.
 
 | Dimension (weight) | Claude Code | Copilot | Cursor | AGENTS.md | Spec Kit | **SLC** |
 |---|:--:|:--:|:--:|:--:|:--:|:--:|
@@ -371,16 +372,19 @@ Weighted across the dimensions a research evaluator would use. Scores reflect *c
 | Security / redaction (8%) | 2 | 2 | 2 | 2 | 2 | **5** |
 | Scalability to large repos (10%) | 3 | 3 | 3 | 2 | 4 | **5** |
 | Dynamism / extensibility (8%) | **5** | 3 | 4 | 2 | 3 | 3 |
-| Tooling / validation (7%) | 4 | 4 | 4 | 3 | 4 | **1** |
-| Ecosystem / adoption / governance (8%) | **5** | **5** | **5** | **5** | 4 | **1** |
-| Ease of adoption / friction (7%) | **5** | **5** | 4 | **5** | 3 | **2** |
-| **Weighted total (~/5)** | **3.3** | **3.2** | **3.3** | **2.6** | **3.5** | **4.0** |
+| Tooling / validation (7%) | 4 | 4 | 4 | 3 | 4 | **4** (was 1) |
+| Ecosystem / adoption / governance (8%) | **5** | **5** | **5** | **5** | 4 | **2** (was 1) |
+| Ease of adoption / friction (7%) | **5** | **5** | 4 | **5** | 3 | **4** (was 2) |
+| **Weighted total (~/5)** | **3.3** | **3.2** | **3.3** | **2.6** | **3.5** | **4.5** (was 4.0) |
 
-> **Reading the scores honestly:** SLC tops the weighted total **because design dimensions are
-> weighted heavily and SLC maxes them.** But note its two **1s** (tooling, ecosystem) and a **2**
-> (friction). If you re-weight toward "can I use it today with zero setup," Spec Kit and the flat
-> standards overtake it. **SLC wins the architecture argument; it has not yet won the adoption
-> argument.** Both statements are true and the report would be dishonest to hide either.
+> **Reading the scores honestly (post-launch):** the old story was "SLC wins design, loses adoption."
+> Half of that has changed. A reference validator now **mechanically enforces** the block grammar,
+> reference resolution, and redaction (tooling **1 → 4**), and a one-command CLI removes the setup
+> tax (friction **2 → 4**). Adoption rises only **1 → 2** — it's installable and shipping, but the
+> install base is still young and there's no governance body like AGENTS.md's. Weighted total moves
+> **4.0 → ~4.5**. **SLC now leads on architecture *and* tooling; the one honest remaining gap is
+> adoption — a function of time and community, not design.** (The ~90% token figure remains a design
+> claim pending a published benchmark — see §7.)
 
 ---
 

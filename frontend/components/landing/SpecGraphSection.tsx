@@ -106,7 +106,7 @@ const SPEC_CONTENT: Record<string, SpecContent> = {
     badge: "@block INTENT project_context",
     intent: "Defines the project purpose and user journeys. Immutable unless explicitly overridden.",
     points: [
-      "Goal: registration portal for SLC language early access",
+      "Goal: registration portal for the SLC language & framework",
       "User journey: Register → Login → Agree NDA → Download → Submit Review",
       "Admin journey: Generate one-time keys → Share with approved users",
       "Non-goals: no social features, payments, real-time, or mobile app",

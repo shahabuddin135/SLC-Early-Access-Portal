@@ -420,23 +420,22 @@ export default function WheelNav() {
                   Sign in
                 </Link>
                 <Link
-                  href="/register"
+                  href="/docs"
                   onClick={closeNav}
                   style={{
-                    fontFamily: "var(--font-sans)",
+                    fontFamily: "var(--font-mono)",
                     fontWeight: 600,
                     fontSize: "0.82rem",
-                    letterSpacing: "0.08em",
+                    letterSpacing: "0.04em",
                     color: "#0A0A0A",
                     background: "#FF4500",
                     padding: "12px 28px",
                     textDecoration: "none",
-                    textTransform: "uppercase",
                     display: "inline-block",
                     marginTop: "4px",
                   }}
                 >
-                  Request access →
+                  $ npx @wewise/slc →
                 </Link>
               </div>
             </div>
@@ -460,7 +459,7 @@ export default function WheelNav() {
                   textTransform: "uppercase",
                 }}
               >
-                WeWise Labs · Early Access 2026
+                WeWise Labs · npx @wewise/slc · 2026
               </span>
             </div>
           </div>

@@ -14,9 +14,27 @@ const TONE: Record<string, { bar: string; bg: string }> = {
 };
 
 function CodeBlock({ block }: { block: Extract<Block, { t: "code" }> }) {
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(block.code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1400);
+    } catch {
+      /* clipboard blocked — no-op */
+    }
+  };
   return (
     <div className="docs-code" dir="ltr">
       {block.lang && <span className="docs-code-lang">{block.lang}</span>}
+      <button
+        className={`docs-copy ${copied ? "is-copied" : ""}`}
+        onClick={copy}
+        aria-label="Copy to clipboard"
+        type="button"
+      >
+        {copied ? "Copied ✓" : "Copy"}
+      </button>
       <pre>
         <code>{block.code}</code>
       </pre>
@@ -281,11 +299,19 @@ export default function DocsPage() {
           background: #0C0C0C; border: 1px solid #1C1C1C; border-radius: 10px; overflow: hidden;
         }
         .docs-code-lang {
-          position: absolute; top: 0; right: 0;
+          position: absolute; top: 0; left: 0;
           font-family: var(--font-mono); font-size: 0.58rem; letter-spacing: 0.12em; text-transform: uppercase;
           color: #5F5B53; padding: 7px 12px;
         }
-        .docs-code pre { margin: 0; padding: 18px 18px; overflow-x: auto; }
+        .docs-copy {
+          position: absolute; top: 7px; right: 8px; z-index: 2;
+          font-family: var(--font-mono); font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase;
+          color: #8C887F; background: rgba(255,255,255,0.04); border: 1px solid #232323; border-radius: 6px;
+          padding: 5px 9px; cursor: pointer; transition: color .15s, border-color .15s, background .15s;
+        }
+        .docs-copy:hover { color: #F0EBE2; border-color: #333; }
+        .docs-copy.is-copied { color: #0A0A0A; background: ${ORANGE}; border-color: ${ORANGE}; }
+        .docs-code pre { margin: 0; padding: 30px 18px 18px; overflow-x: auto; }
         .docs-code code { font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.7; color: #C7D0C2; white-space: pre; }
 
         .docs-foot { padding-top: 40px; display: flex; flex-direction: column; gap: 18px; align-items: flex-start; }

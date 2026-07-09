@@ -265,6 +265,19 @@ export default function ComparisonSection() {
           <span style={{ color: "#F0EEE9" }}>On structure, SLC isn&apos;t ahead of the field — it&apos;s
           a different category.</span>
         </p>
+        <p
+          className="cm-reveal"
+          style={{
+            opacity: 0,
+            fontFamily: "var(--font-mono)", fontSize: "0.68rem",
+            color: "#6E6B66", lineHeight: 1.6, margin: "18px 0 0", maxWidth: "52em",
+          }}
+        >
+          Honesty note: &ldquo;built in&rdquo; means defined by the SLC format. The structural rows
+          (grammar, references, split protocol, contract derivation, redaction) are mechanically
+          enforced today by <span style={{ color: "#FF7A45" }}>slc doctor</span>; hash/version drift
+          detection is defined in the spec and lands with the v0.3 validator.
+        </p>
       </div>
 
       <style>{`

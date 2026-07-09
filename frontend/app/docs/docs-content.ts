@@ -48,8 +48,8 @@ export const SECTIONS: DocSection[] = [
       {
         t: "callout",
         tone: "tip",
-        en: "Two files do the heavy lifting: SLC.md (the language) and slc_universal_structure.md (the structure). Drop them in your project root and every session starts from the same page.",
-        ur: "اصل کام دو فائلیں کرتی ہیں: SLC.md (زبان) اور slc_universal_structure.md (ساخت)۔ انہیں اپنے پروجیکٹ کے root میں رکھ دیں، پھر ہر سیشن ایک ہی نقطے سے شروع ہوتا ہے۔",
+        en: "The fastest path is the Groundwork terminal (section 01): npx @wewise/slc — it carries the SLC rulebook inside and does the whole flow for you. The manual file-based path still works and is documented from section 05 onward.",
+        ur: "تیز ترین راستہ Groundwork ٹرمینل ہے (سیکشن 01): npx @wewise/slc — SLC کا rulebook اس کے اندر موجود ہے اور یہ پورا عمل خود کرتا ہے۔ دستی فائل والا طریقہ بھی چلتا ہے اور سیکشن 05 سے آگے موجود ہے۔",
       },
       {
         t: "p",
@@ -59,10 +59,255 @@ export const SECTIONS: DocSection[] = [
     ],
   },
   {
-    id: "prerequisites",
+    id: "terminal",
     num: "01",
-    title: { en: "Before you start", ur: "شروع کرنے سے پہلے" },
+    title: { en: "The terminal · Groundwork", ur: "ٹرمینل · Groundwork" },
     blocks: [
+      {
+        t: "p",
+        en: "The fastest way to use SLC is the Groundwork terminal. One command turns your requirement.md into a complete, validated spec tree, using your own AI. It writes specs, never application code.",
+        ur: "SLC استعمال کرنے کا تیز ترین طریقہ Groundwork ٹرمینل ہے۔ ایک کمانڈ آپ کی requirement.md کو ایک مکمل، تصدیق شدہ spec tree میں بدل دیتی ہے — آپ کے اپنے AI کے ذریعے۔ یہ کوڈ نہیں، صرف specs لکھتا ہے۔",
+      },
+      { t: "h3", en: "Install and run", ur: "انسٹال اور چلائیں" },
+      {
+        t: "code",
+        lang: "bash",
+        code: `npx @wewise/slc        # npm
+pnpm dlx @wewise/slc   # pnpm
+bunx @wewise/slc       # bun`,
+      },
+      {
+        t: "callout",
+        tone: "tip",
+        en: "No global install needed. It runs the same way under npm, pnpm, or bun.",
+        ur: "کوئی گلوبل انسٹال نہیں چاہیے۔ یہ npx، pnpm یا bun — کسی بھی پیکج مینیجر سے ایک جیسا چلتا ہے۔",
+      },
+      { t: "h3", en: "Two ways to connect your AI", ur: "اپنے AI کو جوڑنے کے دو طریقے" },
+      {
+        t: "ul",
+        en: [
+          "Bridge mode (recommended): use your Claude Code, Copilot, or chat subscription. No API key needed — SLC writes the prompt to a file, you run it in your agent, and drop the result back.",
+          "API key: Anthropic, or any OpenAI-compatible endpoint (OpenAI, Google, OpenRouter, Ollama).",
+        ],
+        ur: [
+          "Bridge mode (تجویز کردہ): اپنا Claude Code، Copilot یا chat سبسکرپشن استعمال کریں۔ کوئی API key نہیں چاہیے — SLC پرامپٹ ایک فائل میں لکھ دیتا ہے، آپ اسے اپنے ایجنٹ میں چلاتے ہیں، اور نتیجہ واپس دے دیتے ہیں۔",
+          "API key: Anthropic، یا کوئی بھی OpenAI-compatible endpoint (OpenAI، Google، OpenRouter، Ollama)۔",
+        ],
+      },
+      { t: "h3", en: "The flow", ur: "مکمل عمل" },
+      {
+        t: "ol",
+        en: [
+          "Pick your AI (bridge or API key).",
+          "SLC reads your requirement.md and asks only about the gaps it cannot resolve.",
+          "Backend specs are generated first, then it stops at a review gate.",
+          "After you confirm, the frontend specs are generated, with their CONTRACT derived from the backend.",
+          "slc doctor validates the whole tree.",
+          "When it's done, SLC prints the exact line to paste into your coding agent to start building — with the real first task filled in.",
+        ],
+        ur: [
+          "اپنا AI چنیں (bridge یا API key)۔",
+          "SLC آپ کی requirement.md پڑھتا ہے اور صرف ان نکات کے بارے میں پوچھتا ہے جو واضح نہیں۔",
+          "پہلے backend specs بنتی ہیں، پھر review gate پر رک جاتا ہے۔",
+          "تصدیق کے بعد frontend specs بنتی ہیں، جن کا CONTRACT backend سے اخذ ہوتا ہے۔",
+          "slc doctor پورے tree کی تصدیق کرتا ہے۔",
+          "مکمل ہونے پر SLC وہ درست لائن دکھاتا ہے جو آپ اپنے coding agent میں پیسٹ کر کے کام شروع کرتے ہیں — پہلا task خودبخود بھرا ہوا۔",
+        ],
+      },
+      {
+        t: "callout",
+        tone: "info",
+        en: "Remember: SLC writes specs, not application code. Your agent writes the code from those specs.",
+        ur: "یاد رکھیں: SLC صرف specs لکھتا ہے، ایپلیکیشن کوڈ نہیں۔ کوڈ آپ کا ایجنٹ ان specs سے لکھتا ہے۔",
+      },
+      { t: "h3", en: "Commands", ur: "کمانڈز" },
+      {
+        t: "code",
+        lang: "bash",
+        code: `slc            # guided spec generation
+slc doctor     # validate an existing spec/ tree
+slc --help     # all commands`,
+      },
+      {
+        t: "p",
+        en: "Validate your specs at any time by running slc doctor — it checks structure, resolves every read_order and depends_on reference, and scans for leaked secrets.",
+        ur: "کسی بھی وقت slc doctor چلا کر اپنی specs کی جانچ کریں — یہ ساخت دیکھتا ہے، ہر read_order اور depends_on حوالہ حل کرتا ہے، اور خفیہ معلومات کے اخراج کو پکڑتا ہے۔",
+      },
+      { t: "h3", en: "Your mission, on a map", ur: "آپ کا مشن، ایک نقشے پر" },
+      {
+        t: "p",
+        en: "The terminal runs on a mission map saved in .slc/. It always knows what's done, where you are, and what's next — across pauses, Ctrl+C, and restarts. Every phase gets a numbered header, and the map re-renders when you resume.",
+        ur: "ٹرمینل ایک mission map پر چلتا ہے جو .slc/ میں محفوظ رہتا ہے۔ اسے ہمیشہ معلوم ہوتا ہے کہ کیا مکمل ہوا، آپ کہاں ہیں، اور آگے کیا ہے — رکنے، Ctrl+C اور دوبارہ چلانے کے باوجود۔",
+      },
+      {
+        t: "code",
+        lang: "text",
+        code: `✦ MISSION — a validated spec tree, then handoff
+│
+├ ✓ Connect your AI
+├ ✓ Read your requirement
+├ ✓ Clarify the gaps
+├ ▸ Backend specs   ◄ you are here
+├ · Checkpoint — project setup
+├ · Design taste — capture & demo
+├ · Frontend specs (from the backend contract)
+└ · Handoff to your coding agent`,
+      },
+      { t: "h3", en: "Checkpoints — SLC waits for you", ur: "چیک پوائنٹس — SLC آپ کا انتظار کرتا ہے" },
+      {
+        t: "p",
+        en: "After the backend specs are locked, SLC pauses on purpose. It scans your specs for their {PLACEHOLDER} tokens and turns them into your setup checklist: database, secrets, env. Do it at your pace — answer 'all set', 'give me a minute', or 'skip for now' (the handoff will remind you).",
+        ur: "backend specs لاک ہونے کے بعد SLC جان بوجھ کر رکتا ہے۔ یہ آپ کی specs میں موجود {PLACEHOLDER} tokens سے آپ کی سیٹ اپ فہرست بناتا ہے: ڈیٹابیس، secrets، env۔ اپنی رفتار سے کریں — 'سب ہو گیا'، 'ذرا رکیں'، یا 'ابھی چھوڑ دیں' میں سے جواب دیں۔",
+      },
+      { t: "h3", en: "The design demo (your taste, locked)", ur: "ڈیزائن ڈیمو (آپ کا ذوق، محفوظ)" },
+      {
+        t: "ol",
+        en: [
+          "A quick taste interview: vibe, light/dark, corners, spacing, primary color, type feel.",
+          "SLC renders ONE demo page of YOUR app's actual screens from your requirement — in your stack's styling idiom, with fake data.",
+          "It opens in your browser. Lock it, tweak it, or redo the questions until it feels right.",
+          "The approved design is frozen into the frontend specs — every UI task must follow it.",
+        ],
+        ur: [
+          "ایک مختصر ذوق انٹرویو: انداز، light/dark، کونے، فاصلہ، بنیادی رنگ، فونٹ کا مزاج۔",
+          "SLC آپ کی requirement کی اصل اسکرینوں کا ایک ڈیمو صفحہ بناتا ہے — آپ کے اپنے stack کے انداز میں، فرضی ڈیٹا کے ساتھ۔",
+          "یہ براؤزر میں کھلتا ہے۔ پسند آئے تو lock کریں، ورنہ tweak یا دوبارہ سوالات۔",
+          "منظور شدہ ڈیزائن frontend specs میں منجمد ہو جاتا ہے — ہر UI task اسی پر چلتا ہے۔",
+        ],
+      },
+      {
+        t: "callout",
+        tone: "info",
+        en: "The demo is a visual spec artifact — a preview, never production code. Your agent still writes all the code from the specs.",
+        ur: "ڈیمو صرف ایک بصری نمونہ ہے — production کوڈ نہیں۔ سارا کوڈ آپ کا agent specs سے لکھتا ہے۔",
+      },
+      { t: "h3", en: "Pause any time", ur: "جب چاہیں رکیں" },
+      {
+        t: "p",
+        en: "At the review gate you can answer 'I need more time'. Everything is saved; the next run reopens the map exactly where you left it. Ctrl+C is safe too.",
+        ur: "review gate پر آپ 'مجھے مزید وقت چاہیے' کہہ سکتے ہیں۔ سب کچھ محفوظ رہتا ہے؛ اگلی بار نقشہ وہیں سے کھلتا ہے۔ Ctrl+C بھی محفوظ ہے۔",
+      },
+    ],
+  },
+  {
+    id: "commands",
+    num: "02",
+    title: { en: "Commands", ur: "کمانڈز" },
+    blocks: [
+      {
+        t: "p",
+        en: "Everything the terminal can do, in one place. All of these run with npx @wewise/slc, pnpm dlx, or bunx.",
+        ur: "ٹرمینل کی تمام کمانڈز ایک جگہ۔ یہ سب npx @wewise/slc، pnpm dlx یا bunx سے چلتی ہیں۔",
+      },
+      {
+        t: "code",
+        lang: "bash",
+        code: `slc                  # the guided spec generator (interactive)
+slc doctor           # validate spec/ — structure, references, secrets
+slc doctor --json    # same, machine-readable (CI-friendly, exit 1 on errors)
+slc bridge           # write AGENTS.md + CLAUDE.md so agents auto-load SPEC.md
+slc --version        # version
+slc --help           # help`,
+      },
+      {
+        t: "ul",
+        en: [
+          "Your AI config, mission map, and run files live in .slc/ (auto-gitignored).",
+          "SLC_ASCII=1 switches the art to plain ASCII for older terminals.",
+          "slc needs a real terminal; doctor --json and bridge also work in CI.",
+        ],
+        ur: [
+          "آپ کی AI config، mission map اور run فائلیں .slc/ میں رہتی ہیں (خودکار gitignore)۔",
+          "پرانے ٹرمینلز کے لیے SLC_ASCII=1 سادہ ASCII آرٹ دکھاتا ہے۔",
+          "slc کو اصل ٹرمینل چاہیے؛ doctor --json اور bridge CI میں بھی چلتے ہیں۔",
+        ],
+      },
+    ],
+  },
+  {
+    id: "dodont",
+    num: "03",
+    title: { en: "Do & don't", ur: "کریں اور نہ کریں" },
+    blocks: [
+      { t: "h3", en: "Do", ur: "کریں" },
+      {
+        t: "ul",
+        en: [
+          "Write requirement.md like you'd brief a junior dev — explicit features, stack, non-goals.",
+          "Use bridge mode if you already pay for Claude Code / Copilot — no API key needed.",
+          "Take the review gate seriously: the backend contract is frozen after you confirm.",
+          "Run slc doctor in CI so broken specs never merge.",
+          "Update requirement.md first when scope changes, then regenerate.",
+        ],
+        ur: [
+          "requirement.md ایسے لکھیں جیسے junior developer کو سمجھا رہے ہوں — واضح فیچرز، stack، non-goals۔",
+          "اگر Claude Code / Copilot کی سبسکرپشن ہے تو bridge mode استعمال کریں — API key کی ضرورت نہیں۔",
+          "review gate کو سنجیدہ لیں: تصدیق کے بعد backend contract منجمد ہو جاتا ہے۔",
+          "CI میں slc doctor چلائیں تاکہ خراب specs کبھی merge نہ ہوں۔",
+          "دائرہ بدلے تو پہلے requirement.md بدلیں، پھر دوبارہ generate کریں۔",
+        ],
+      },
+      { t: "h3", en: "Don't", ur: "نہ کریں" },
+      {
+        t: "ul",
+        en: [
+          "Don't put real secrets, emails, or keys in requirement.md or any spec — SLC scans and will stop you.",
+          "Don't hand-edit task status inside task files — task_index.md is the only status ledger.",
+          "Don't let your agent invent endpoints — the frontend derives from the backend CONTRACT.",
+          "Don't switch models mid-project; interpretations drift.",
+          "Don't batch many tasks in one agent prompt — one task, one loop.",
+        ],
+        ur: [
+          "requirement.md یا کسی spec میں اصلی secrets، ای میلز یا keys نہ رکھیں — SLC اسکین کر کے روک دے گا۔",
+          "task فائلوں میں status ہاتھ سے نہ بدلیں — status صرف task_index.md میں ہوتا ہے۔",
+          "agent کو endpoints ایجاد نہ کرنے دیں — frontend ہمیشہ backend CONTRACT سے نکلتا ہے۔",
+          "project کے دوران ماڈل نہ بدلیں؛ تشریحات بہک جاتی ہیں۔",
+          "ایک prompt میں بہت سے tasks نہ دیں — ایک task، ایک چکر۔",
+        ],
+      },
+    ],
+  },
+  {
+    id: "troubleshoot",
+    num: "04",
+    title: { en: "Troubleshooting", ur: "مسائل کا حل" },
+    blocks: [
+      {
+        t: "ul",
+        en: [
+          "\"The output looks truncated\" — the model hit its output limit. Use a larger-output model, or bridge mode with your agent.",
+          "\"Could not read backend.output.json\" — make sure your agent saved the JSON to .slc/run/ exactly at the printed path.",
+          "doctor: UNRESOLVED_REFERENCE — a read_order/depends_on path points at nothing. Fix it to a real path like backend_specs/ARCH.md#block.",
+          "doctor: SENSITIVE_DATA_LEAK — a real email/key/IP is in a spec. Replace it with a {PLACEHOLDER} and put the value in .slc_secrets.",
+          "\"Key check failed\" — check the base URL and key; OpenRouter/Ollama need their own base URLs.",
+          "\"Rate limited (429)\" — wait a moment; SLC retries with backoff automatically.",
+          "The demo didn't open — open .slc/preview/demo.html in your browser manually.",
+          "Weird symbols in the terminal — run with SLC_ASCII=1.",
+        ],
+        ur: [
+          "\"Output truncated\" — ماڈل کی output حد آ گئی۔ بڑی output والا ماڈل لیں یا bridge mode استعمال کریں۔",
+          "\"backend.output.json نہیں ملی\" — یقینی بنائیں کہ agent نے JSON بالکل بتائے گئے راستے .slc/run/ میں محفوظ کی ہے۔",
+          "doctor: UNRESOLVED_REFERENCE — کوئی read_order/depends_on راستہ غلط ہے۔ اسے اصل راستہ بنائیں جیسے backend_specs/ARCH.md#block۔",
+          "doctor: SENSITIVE_DATA_LEAK — کسی spec میں اصلی ای میل/key/IP ہے۔ {PLACEHOLDER} رکھیں اور اصل قیمت .slc_secrets میں۔",
+          "\"Key check failed\" — base URL اور key دیکھیں؛ OpenRouter/Ollama کے اپنے base URLs ہوتے ہیں۔",
+          "\"Rate limited (429)\" — تھوڑا انتظار کریں؛ SLC خود دوبارہ کوشش کرتا ہے۔",
+          "ڈیمو نہ کھلے تو .slc/preview/demo.html خود براؤزر میں کھول لیں۔",
+          "ٹرمینل میں عجیب نشان نظر آئیں تو SLC_ASCII=1 کے ساتھ چلائیں۔",
+        ],
+      },
+    ],
+  },
+  {
+    id: "prerequisites",
+    num: "05",
+    title: { en: "Manual path · before you start", ur: "دستی طریقہ · شروع کرنے سے پہلے" },
+    blocks: [
+      {
+        t: "callout",
+        tone: "info",
+        en: "Using the terminal? It bundles the two SLC files for you, so you can skip step 3 below. Context7 and a consistent model still matter for the build phase.",
+        ur: "ٹرمینل استعمال کر رہے ہیں؟ دونوں SLC فائلیں اس کے اندر شامل ہیں، اس لیے نیچے مرحلہ ۳ چھوڑ سکتے ہیں۔ Context7 اور ایک ہی ماڈل کا اصول build کے مرحلے میں پھر بھی اہم ہے۔",
+      },
       {
         t: "p",
         en: "Set up these three things first. SLC will not work properly without them.",
@@ -101,14 +346,14 @@ export const SECTIONS: DocSection[] = [
       {
         t: "ul",
         en: [
-          "claude-sonnet-4.5–4.6 / claude-opus — best for complex specs and long-context reasoning",
-          "gpt-5 — solid for task execution",
-          "gemini-3.0 / 3.0 pro — a good alternative",
+          "Claude Opus 4.8 / Sonnet 4.6 — best for spec generation and long-context reasoning",
+          "GPT-5 — strong for task execution",
+          "Gemini 3 Pro — a solid alternative; Fable 5 for fast iteration",
         ],
         ur: [
-          "claude-sonnet-4.5–4.6 / claude-opus — پیچیدہ specs اور لمبے context کے لیے بہترین",
-          "gpt-5 — tasks مکمل کرنے کے لیے مضبوط",
-          "gemini-3.0 / 3.0 pro — ایک اچھا متبادل",
+          "Claude Opus 4.8 / Sonnet 4.6 — specs بنانے اور لمبے context کے لیے بہترین",
+          "GPT-5 — tasks مکمل کرنے کے لیے مضبوط",
+          "Gemini 3 Pro — ایک اچھا متبادل؛ تیز کام کے لیے Fable 5",
         ],
       },
       {
@@ -138,7 +383,7 @@ export const SECTIONS: DocSection[] = [
   },
   {
     id: "requirements",
-    num: "02",
+    num: "06",
     title: { en: "Write your requirements", ur: "اپنی ضروریات لکھیں" },
     blocks: [
       {
@@ -192,9 +437,15 @@ Hard limits that must never be violated.`,
   },
   {
     id: "generate",
-    num: "03",
+    num: "07",
     title: { en: "Generate the specs", ur: "specs بنائیں" },
     blocks: [
+      {
+        t: "callout",
+        tone: "tip",
+        en: "The fastest path is the terminal (section 01): run npx @wewise/slc and it does all of this for you — reads your requirement, asks about the gaps, generates the spec tree, and validates it. The manual prompts below are the fallback if you'd rather paste files into a chat yourself.",
+        ur: "سب سے تیز طریقہ ٹرمینل ہے (سیکشن 01): npx @wewise/slc چلائیں اور یہ سب کچھ خود کر دیتا ہے — آپ کی requirement پڑھتا ہے، کمی کے سوال پوچھتا ہے، spec tree بناتا ہے، اور تصدیق کرتا ہے۔ نیچے دیے گئے دستی prompts صرف اُس صورت کے لیے ہیں جب آپ خود chat میں فائلیں پیسٹ کرنا چاہیں۔",
+      },
       {
         t: "p",
         en: "Open the LLM in a fresh conversation and give it three files to read carefully: SLC.md, slc_universal_structure.md, and your requirement.md. Then ask it to generate the full spec — no code yet.",
@@ -246,7 +497,7 @@ Do not generate code. Do not assume — if something is missing, ask first.
   },
   {
     id: "execute",
-    num: "04",
+    num: "08",
     title: { en: "Execute tasks", ur: "tasks مکمل کریں" },
     blocks: [
       {
@@ -277,7 +528,7 @@ After reading all spec files, execute task [TASK_ID] from the task index.`,
   },
   {
     id: "sync",
-    num: "05",
+    num: "09",
     title: { en: "Keep specs in sync", ur: "specs کو ہم آہنگ رکھیں" },
     blocks: [
       {
@@ -315,7 +566,7 @@ Follow SLC rules. Do not change anything unrelated to this update.`,
   },
   {
     id: "scope",
-    num: "06",
+    num: "10",
     title: { en: "Extending scope", ur: "دائرہ کار بڑھانا" },
     blocks: [
       {
@@ -346,7 +597,7 @@ Follow SLC rules. Do not change anything unrelated to this update.`,
   },
   {
     id: "mistakes",
-    num: "07",
+    num: "11",
     title: { en: "Common mistakes", ur: "عام غلطیاں" },
     blocks: [
       {

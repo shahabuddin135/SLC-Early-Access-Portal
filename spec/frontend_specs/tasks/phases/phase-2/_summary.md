@@ -5,7 +5,7 @@
 priority: high
 intent: "Frontend Phase 2 overview — Auth Pages"
 scope: phase-2
-depends_on: [fe_phase_1]
+depends_on: [fe_phase_1_summary]
 
 content:
   name: "Auth Pages"

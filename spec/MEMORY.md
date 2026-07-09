@@ -98,7 +98,7 @@ content:
     - "User journey order: register → login → terms modal → dashboard → download warning → key entry → download → review"
     - "JWT expiry: 24 hours"
     - "Password hashing: direct bcrypt only (no passlib)"
-    - "Admin emails: voyagersvrs135@gmail.com, aleemabeera@gmail.com, sarfarazsaba11@gmail.com, darakhshanimranid@gmail.com, myscienceworld135@gmail.com"
+    - "Admin emails: {ADMIN_EMAILS} — resolved from env / .slc_secrets, never committed in plain text"
     - "Key format: XXXX-XXXX-XXXX-XXXX using secrets.token_hex(2).upper()"
     - "Download token TTL: 60 seconds"
 @end

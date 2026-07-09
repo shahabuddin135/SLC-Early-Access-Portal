@@ -5,7 +5,7 @@
 priority: high
 intent: "Frontend Phase 3 overview — Dashboard"
 scope: phase-3
-depends_on: [fe_phase_2]
+depends_on: [fe_phase_2_summary]
 
 content:
   name: "Dashboard"
