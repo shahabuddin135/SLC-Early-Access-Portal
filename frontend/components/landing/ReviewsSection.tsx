@@ -6,9 +6,9 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import type { PublicReview } from "@/lib/api";
 import { reviewByKeyAction } from "@/app/actions/review";
 
-// The archive keeper: mascot carrying the folder of stories.
+// The archive keeper: mascot peeking in to greet the builders.
 const KEEPER =
-  "https://res.cloudinary.com/didt1ywys/image/upload/v1781002981/carrying_file_nmcdwo.png";
+  "https://res.cloudinary.com/dqkt0g0he/image/upload/v1784145648/image_rqmhmm.png";
 
 // ── helpers ─────────────────────────────────────────────────────────────────
 // github_id is entered freehand. Some users put a bare handle ("Syedailsa"),
@@ -303,7 +303,6 @@ export default function ReviewsSection({ reviews }: { reviews: PublicReview[] })
 
         {/* Keeper mascot */}
         <div className="rev-keeper rev-reveal" style={{ opacity: 0 }} aria-hidden>
-          <span className="rev-keeper-glow" />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={KEEPER} alt="" loading="lazy" className="rev-keeper-img" />
         </div>
@@ -339,15 +338,9 @@ export default function ReviewsSection({ reviews }: { reviews: PublicReview[] })
           gap: clamp(24px, 4vw, 56px);
         }
         .rev-keeper { position: relative; display: flex; align-items: center; justify-content: center; }
-        .rev-keeper-glow {
-          position: absolute; inset: -10%;
-          background: radial-gradient(circle, rgba(255,120,40,0.28) 0%, rgba(255,120,40,0) 66%);
-          filter: blur(14px);
-        }
         .rev-keeper-img {
           position: relative; z-index: 1;
           width: clamp(140px, 16vw, 220px); height: auto; object-fit: contain;
-          filter: drop-shadow(0 22px 38px rgba(180,80,20,0.24));
         }
 
         /* ── Ghost add-review button ── */

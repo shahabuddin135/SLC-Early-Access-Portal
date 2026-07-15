@@ -113,7 +113,7 @@ It must define:
 
 ## EXECUTION RULES
 - No code generation before ARCH files are finalized
-- TASKS.md files are locked after user approval
+- Task definitions are frozen after user approval — only `status` fields change
 - CONTRACT.md is authoritative
 - Violations must abort execution
 ```
@@ -247,7 +247,7 @@ This file exists to prevent:
 
 ```md
 ## DECISIONS
-- <final decisions — use role placeholders, never real names>
+- [dec-<slug>] <final decision — use role placeholders, never real names>
 
 ## ASSUMPTIONS
 - <explicit assumptions>
@@ -257,6 +257,8 @@ This file exists to prevent:
 ```
 
 **Redaction rule**: MEMORY.md entries MUST use role placeholders (`{ADMIN}`, `{DEV}`) instead of real names. Example: "{ADMIN} approved schema v2" — never "John approved schema v2".
+
+**Decision id rule**: every decision carries a stable, descriptive kebab-case id derived from its content — `[dec-auth-jwt-over-sessions]`, **never a sequential number** (`dec1`, `dec2`). Parallel git branches that each allocate "the next number" produce two different decisions with the same id; content-derived slugs don't collide (and when they do, it is the same decision). Code comments and cross-references cite the slug. When MEMORY splits (>4KB), `memory/` holds one file per decision named `<slug>.md` plus a `memory_index.md` registry.
 
 If a conflict arises, MEMORY.md always wins.
 
@@ -298,7 +300,7 @@ No tasks. No code.
 #### arch/arch_index.md (HOT)
 
 ```slc
-@block INDEX arch_registry
+@block INDEX backend_arch_registry
 priority: critical
 intent: "Architecture module registry — load section by depends_on match"
 scope: global
@@ -358,7 +360,7 @@ content:
 @end
 ```
 
-**Cross-reference rule**: Tasks use `depends_on: [arch/auth.auth_module]` to reference split ARCH sections. The LLM resolves this to load only `arch/auth.md`.
+**Cross-reference rule**: Tasks use `depends_on: [arch/auth.md#auth_module]` to reference split ARCH sections (the canonical grammar in SLC.md §7). The LLM resolves this to load only `arch/auth.md`.
 
 ---
 
@@ -375,7 +377,7 @@ Defines:
 #### plan/plan_index.md (HOT)
 
 ```slc
-@block INDEX plan_registry
+@block INDEX backend_plan_registry
 priority: high
 intent: "Phase registry — all phases with summaries"
 scope: global
@@ -418,7 +420,7 @@ This file is **authoritative** for frontend.
 #### contract/contract_index.md (HOT)
 
 ```slc
-@block INDEX contract_registry
+@block INDEX backend_contract_registry
 priority: critical
 intent: "API contract registry — endpoint index by domain"
 scope: global
@@ -452,7 +454,7 @@ content:
 priority: critical
 intent: "Auth API endpoints — schemas and payloads"
 scope: module
-depends_on: [arch/auth.auth_module]
+depends_on: [arch/auth.md#auth_module]
 
 content:
   base_path: "/api/v1/auth"
@@ -510,7 +512,7 @@ tasks/
 
 **Authority**: Global task registry — lists ALL tasks at once.
 
-**Key Rule**: Tasks are NOT locked. All visible from start.
+**Key Rule**: all tasks are visible from the start (no phase-gating). After user approval, task *definitions* freeze — only `status` fields keep changing.
 
 **Responsibilities**:
 - List ALL tasks across ALL phases with status
@@ -521,7 +523,7 @@ tasks/
 **Required Structure**:
 
 ```slc
-@block INDEX task_registry
+@block INDEX backend_task_registry
 priority: critical
 intent: "Global task registry - all tasks visible"
 scope: global
@@ -696,7 +698,7 @@ LLM must follow this loop:
 5. Generate task files (phase‑by‑phase)
 6. Create task_index.md
 7. Ask for user approval
-8. Lock task_index
+8. Freeze task definitions (status fields stay live)
 9. **Execute tasks via router**:
     - Read task_index.md
     - Load only current phase file
@@ -741,6 +743,16 @@ If the user requests changes:
 - TASKS change after lock → must unlock explicitly
 
 Changes must be recorded in MEMORY.md.
+
+### Parallel work (branches & merges)
+
+Spec files live in git; parallel branches WILL merge. The rules that keep merges safe:
+
+- **Identity is a slug, never a sequence number.** Decisions are `dec-<slug>`; block names and registry ids are descriptive and unique across the whole tree (prefix `backend_`/`frontend_` when both sides need the same registry name). Branches deriving ids from content rarely collide; branches counting "the next number" always do.
+- **Adding tasks on a branch**: name the file `{phase}.{next}_{slug}.md` as usual — if two branches pick the same number, the slug keeps the files distinct and the validator flags the duplicate id; renumber the later one at merge.
+- **Counters are derived values.** `total_tasks`, estimates, and endpoint counts follow from the lists they summarize. After a merge the list is the truth; recompute the number.
+- **Status merge rule**: when two branches disagree on a task's `status`, the more-advanced value wins (`done` > `in-progress` > `todo`).
+- **After every merge, run `slc doctor`.** It flags leftover conflict markers, duplicate blocks/ids, ambiguous references, single+split coexistence, orphaned task files, and stale counts.
 
 ---
 

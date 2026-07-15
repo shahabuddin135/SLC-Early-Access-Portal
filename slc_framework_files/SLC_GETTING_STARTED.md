@@ -11,7 +11,7 @@ The fastest way to use SLC is the **Groundwork terminal**. One command turns you
 into a complete, validated spec tree, using your own AI. It writes **specs, never code**.
 
 ```bash
-npx @wewise/slc        # or: pnpm dlx @wewise/slc · bunx @wewise/slc
+npx @wewiselabs/slc        # or: pnpm dlx @wewiselabs/slc · bunx @wewiselabs/slc
 ```
 
 It works two ways, and **you don't need an API key**:

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { SECTIONS, UI, type Block, type Lang } from "./docs-content";
+import { SECTIONS_BY_EDITION, UI, type Block, type Edition, type Lang } from "./docs-content";
 
 const ORANGE = "#FF4500";
 const ORANGE_SOFT = "#FF6B33";
@@ -80,15 +80,19 @@ function BlockView({ block, lang }: { block: Block; lang: Lang }) {
 
 export default function DocsPage() {
   const [lang, setLang] = useState<Lang>("en");
-  const [active, setActive] = useState(SECTIONS[0].id);
+  const [edition, setEdition] = useState<Edition>("cli");
+  const SECTIONS = SECTIONS_BY_EDITION[edition];
+  const [active, setActive] = useState(SECTIONS_BY_EDITION.cli[0].id);
   const mainRef = useRef<HTMLDivElement>(null);
 
-  // Restore saved language (client-only; must run in an effect to stay
+  // Restore saved language + edition (client-only; must run in an effect to stay
   // hydration-safe — localStorage isn't available during SSR).
   useEffect(() => {
-    const saved = typeof window !== "undefined" ? window.localStorage.getItem("slc-docs-lang") : null;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing a persisted preference from localStorage
-    if (saved === "en" || saved === "ur") setLang(saved);
+    const savedLang = typeof window !== "undefined" ? window.localStorage.getItem("slc-docs-lang") : null;
+    const savedEd = typeof window !== "undefined" ? window.localStorage.getItem("slc-docs-edition") : null;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing persisted preferences from localStorage
+    if (savedLang === "en" || savedLang === "ur") setLang(savedLang);
+    if (savedEd === "cli" || savedEd === "manual") setEdition(savedEd);
   }, []);
 
   const changeLang = (l: Lang) => {
@@ -98,7 +102,17 @@ export default function DocsPage() {
     } catch {}
   };
 
-  // Scrollspy
+  const changeEdition = (e: Edition) => {
+    if (e === edition) return;
+    setEdition(e);
+    setActive(SECTIONS_BY_EDITION[e][0].id);
+    try {
+      window.localStorage.setItem("slc-docs-edition", e);
+    } catch {}
+    window.scrollTo({ top: 0 });
+  };
+
+  // Scrollspy — re-arm whenever the edition swaps the section list.
   useEffect(() => {
     const els = SECTIONS.map((s) => document.getElementById(s.id)).filter(Boolean) as HTMLElement[];
     const obs = new IntersectionObserver(
@@ -112,9 +126,10 @@ export default function DocsPage() {
     );
     els.forEach((el) => obs.observe(el));
     return () => obs.disconnect();
-  }, []);
+  }, [SECTIONS]);
 
   const ur = lang === "ur";
+  const subtitle = edition === "cli" ? UI.subtitleCli : UI.subtitleManual;
 
   return (
     <div className="docs-root">
@@ -175,7 +190,28 @@ export default function DocsPage() {
           <div className="docs-hero">
             <p className="docs-eyebrow">{UI.eyebrow[lang]}</p>
             <h1 className="docs-title">{UI.title[lang]}</h1>
-            <p className="docs-subtitle">{UI.subtitle[lang]}</p>
+
+            {/* Edition switch — CLI (current) vs Manual (classic) */}
+            <div className="docs-editions" role="group" aria-label={UI.editionLabel[lang]}>
+              <button
+                className={`docs-edition-btn ${edition === "cli" ? "is-active" : ""}`}
+                onClick={() => changeEdition("cli")}
+                aria-pressed={edition === "cli"}
+              >
+                <span className="docs-edition-name">{UI.editionCli[lang]}</span>
+                <span className="docs-edition-hint">{UI.editionCliHint[lang]}</span>
+              </button>
+              <button
+                className={`docs-edition-btn ${edition === "manual" ? "is-active" : ""}`}
+                onClick={() => changeEdition("manual")}
+                aria-pressed={edition === "manual"}
+              >
+                <span className="docs-edition-name">{UI.editionManual[lang]}</span>
+                <span className="docs-edition-hint">{UI.editionManualHint[lang]}</span>
+              </button>
+            </div>
+
+            <p className="docs-subtitle">{subtitle[lang]}</p>
           </div>
 
           {SECTIONS.map((s) => (
@@ -274,6 +310,29 @@ export default function DocsPage() {
         .docs-eyebrow { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.24em; text-transform: uppercase; color: ${ORANGE_SOFT}; margin: 0 0 18px; }
         .docs-title { font-family: var(--font-display); font-weight: 200; font-size: clamp(2.4rem, 6vw, 4rem); letter-spacing: -0.04em; line-height: 1.05; color: #F7F2EA; margin: 0 0 18px; }
         .docs-subtitle { font-family: var(--font-display); font-weight: 300; font-size: clamp(1rem, 1.7vw, 1.2rem); line-height: 1.7; color: #9A958C; margin: 0; max-width: 620px; }
+
+        /* ── Edition switch ── */
+        .docs-editions {
+          display: inline-flex; gap: 8px; margin: 0 0 22px;
+          background: #121212; border: 1px solid #232323; border-radius: 12px; padding: 5px;
+        }
+        .docs-edition-btn {
+          display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
+          background: transparent; border: 1px solid transparent; border-radius: 8px;
+          padding: 9px 16px; cursor: pointer; text-align: start;
+          transition: background 0.18s, border-color 0.18s;
+        }
+        .docs-edition-btn:hover:not(.is-active) { background: rgba(255,255,255,0.03); }
+        .docs-edition-btn.is-active { background: rgba(255,69,0,0.1); border-color: rgba(255,69,0,0.45); }
+        .docs-edition-name {
+          font-family: var(--font-mono); font-size: 0.74rem; font-weight: 700;
+          letter-spacing: 0.06em; color: #B8B3AA;
+        }
+        .docs-edition-btn.is-active .docs-edition-name { color: ${ORANGE_SOFT}; }
+        .docs-edition-hint {
+          font-family: var(--font-mono); font-size: 0.56rem; letter-spacing: 0.14em;
+          text-transform: uppercase; color: #5F5B53;
+        }
 
         .docs-section { scroll-margin-top: 90px; padding: clamp(34px, 5vw, 56px) 0; border-bottom: 1px solid #161616; }
         .docs-section:last-of-type { border-bottom: none; }

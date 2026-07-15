@@ -435,7 +435,7 @@ export default function WheelNav() {
                     marginTop: "4px",
                   }}
                 >
-                  $ npx @wewise/slc →
+                  $ npx @wewiselabs/slc →
                 </Link>
               </div>
             </div>
@@ -459,7 +459,7 @@ export default function WheelNav() {
                   textTransform: "uppercase",
                 }}
               >
-                WeWise Labs · npx @wewise/slc · 2026
+                WeWise Labs · npx @wewiselabs/slc · 2026
               </span>
             </div>
           </div>

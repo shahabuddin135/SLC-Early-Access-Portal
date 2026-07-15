@@ -16,7 +16,7 @@ const STEPS = [
 
 // Mascot presenting the architecture flow.
 const ILLUSTRATION =
-  "https://res.cloudinary.com/didt1ywys/image/upload/v1781002981/planned_files_j1sjxd.png";
+  "https://res.cloudinary.com/dqkt0g0he/image/upload/v1784145648/planned_files_wwsxjc.png";
 
 export default function FrameworkSection({ id }: { id?: string }) {
   const sectionRef = useRef<HTMLElement>(null);
@@ -85,7 +85,6 @@ export default function FrameworkSection({ id }: { id?: string }) {
         {/* ── Intro band: big mascot left · heading right ── */}
         <div className="fw-intro">
           <div className="fw-art" style={{ position: "relative", minWidth: 0, opacity: 0 }}>
-            <span className="fw-glow" aria-hidden />
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={ILLUSTRATION} alt="" aria-hidden loading="lazy" className="fw-mascot" />
           </div>
@@ -202,13 +201,6 @@ export default function FrameworkSection({ id }: { id?: string }) {
           gap: clamp(28px, 5vw, 80px);
         }
         .fw-art { display: flex; align-items: center; justify-content: center; }
-        .fw-glow {
-          position: absolute;
-          inset: -6%;
-          background: radial-gradient(circle, rgba(255,120,40,0.22) 0%, rgba(255,120,40,0) 66%);
-          filter: blur(16px);
-          z-index: 0;
-        }
         .fw-mascot {
           position: relative;
           z-index: 1;
@@ -216,7 +208,6 @@ export default function FrameworkSection({ id }: { id?: string }) {
           max-width: clamp(280px, 40vw, 460px);
           height: auto;
           object-fit: contain;
-          filter: drop-shadow(0 26px 44px rgba(180,90,30,0.22));
         }
         @media (max-width: 860px) {
           .fw-intro { grid-template-columns: 1fr; gap: clamp(22px, 6vw, 40px); }

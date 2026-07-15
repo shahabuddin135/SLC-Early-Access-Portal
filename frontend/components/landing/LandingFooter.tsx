@@ -289,7 +289,7 @@ export default function LandingFooter() {
               letterSpacing: "0.08em",
             }}
           >
-            SLC · npx @wewise/slc · Open
+            SLC · npx @wewiselabs/slc · Open
           </p>
         </div>
       </div>

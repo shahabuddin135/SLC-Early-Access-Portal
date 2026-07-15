@@ -56,7 +56,7 @@ content:
 ```
 
 - `<BLOCK-TYPE>` is a token that categorizes the block (examples: `INDEX`, `PLAN`, `TASK`, `ARCH`, `INTENT`, `CONSTRAINTS`, `ROUTE`, `META`, `LINK`).
-- `<BLOCK-NAME>` is an optional identifier used for cross-references. It must be unique within the file.
+- `<BLOCK-NAME>` is an optional identifier used for cross-references. It must be unique within the file, and SHOULD be unique across the whole spec tree — a bare-name reference cannot resolve deterministically when two files define the same name (merging parallel branches is the classic cause; validators emit `DUPLICATE_BLOCK` / `AMBIGUOUS_REFERENCE`). Derive names from content (descriptive slugs), never from a running counter.
 
 ---
 
@@ -266,6 +266,18 @@ When a parser/runner encounters an error it must produce structured diagnostics 
 - `CIRCULAR_DEPENDENCY` — unexpected cycle
 - `CONSTRAINT_VIOLATION` — runtime constraint breach
 
+Merge-safety codes (typically surface after merging parallel branches):
+
+- `MERGE_CONFLICT_MARKER` — unresolved git conflict markers (`<<<<<<<` / `>>>>>>>`) in a spec file
+- `DUPLICATE_BLOCK` — a block name defined more than once (within one file: error; across files: rename or reference by explicit path)
+- `AMBIGUOUS_REFERENCE` — a bare-name reference matches a block defined in several files
+- `DUPLICATE_ID` — the same registry id appears twice in one index
+- `INDEX_CONFLICT` — more than one `INDEX` block in a file
+- `SPLIT_COEXISTENCE` — both `NAME.md` and `name/` exist for the same spec
+- `ORPHAN_TASK_FILE` — a task file no index references (it would never execute)
+- `STALE_COUNT` — a declared total does not match the entries actually listed
+- `SEQUENTIAL_ID` — sequential ids (`dec1`, `dec2`, …) where content-derived slugs are required
+
 Diagnostics must include:
 - `file`, `block`, `line`, `code`, `message`, `suggested_fix`
 
@@ -279,13 +291,15 @@ declarative until a runner acts on them.
 
 - **MUST** (minimal conformant validator): parse `@block … @end`; require the mandatory `INDEX` block
   and root files; resolve every `read_order`/`depends_on` reference against the tree (§7 grammar);
-  scan for `SENSITIVE_DATA_LEAK`; detect `CIRCULAR_DEPENDENCY` and `CONTRACT_MISMATCH`.
-- **SHOULD**: emit `LOOSE_REFERENCE`; offer auto-fix on failure.
+  scan for `SENSITIVE_DATA_LEAK`; detect `CIRCULAR_DEPENDENCY` and `CONTRACT_MISMATCH`;
+  run the merge-safety scans (§10): `MERGE_CONFLICT_MARKER`, `DUPLICATE_BLOCK`,
+  `AMBIGUOUS_REFERENCE`, `DUPLICATE_ID`, `INDEX_CONFLICT`, `SPLIT_COEXISTENCE`.
+- **SHOULD**: emit `LOOSE_REFERENCE`, `ORPHAN_TASK_FILE`, `STALE_COUNT`, `SEQUENTIAL_ID`; offer auto-fix on failure.
 - **MAY** (defined, **not yet enforced** — v0.2 roadmap): `hash` change detection,
   `version` / `POTENTIAL_CONCURRENT_EDIT`, `COMPUTED` evaluation, `signature` verification,
   `streamable` partial reads, and `failure_if_skipped` abort enforcement.
 
-The reference validator **`slc doctor`** (shipped in the `@wewise/slc` CLI) implements the MUST tier
+The reference validator **`slc doctor`** (shipped in the `@wewiselabs/slc` CLI) implements the MUST tier
 and part of SHOULD.
 
 ---
@@ -339,7 +353,7 @@ A project uses EITHER `{NAME}.md` (single) OR `{name}/` (split directory) — ne
 
 ### 13.3 Cross-references to split files
 
-References to split sections use the path: `{dir}/{file}.{block}`. Example: `arch/auth.auth_module` resolves to the `auth_module` block inside `arch/auth.md`.
+References to split sections use the canonical grammar (§7): `{dir}/{file}.md#{block}`. Example: `arch/auth.md#auth_module` resolves to the `auth_module` block inside `arch/auth.md`.
 
 The LLM MUST resolve `depends_on` references to determine which section files to load. It MUST NOT load all sections when only one is needed.
 
@@ -509,6 +523,8 @@ This section lists edge cases and SLC behaviour.
 - Split files when they exceed 4KB or contain 3+ domains — use the index + sections pattern.
 - Prefer single files for small projects — splitting adds overhead that isn't justified under 4KB.
 - Use `depends_on` to link tasks to specific ARCH/CONTRACT sections so the LLM loads only what it needs.
+- Derive every id from content (`dec-auth-jwt`, `backend_task_registry`) — never allocate "the next number" on a branch; sequential ids collide on merge.
+- Run the validator (`slc doctor`) after every merge — merges break specs in ways no single branch can see.
 
 ---
 
@@ -516,7 +532,7 @@ This section lists edge cases and SLC behaviour.
 
 SLC defines a conservative, practical system. Unsolved/complex topics:
 
-- **Full transactional merging across distributed authors** — SLC provides diagnostics but not a conflict resolution protocol.
+- **Full transactional merging across distributed authors** — SLC ships post-merge *diagnostics* (the merge-safety codes in §10) and id rules that avoid collisions (content-derived slugs, never counters), but resolution itself stays manual: a human decides which side wins.
 - **Authenticated fetching of `must_read_latest` external docs** — runner integration points depend on environment.
 - **Rich computed language** — SLC limits computing to deterministic, simple ops; complex logic must live in code, not spec.
 - **Automatic embedding/indexing strategy** — SLC is format-level; embedding choices (vectors/hashes) are left to implementers.

@@ -1,10 +1,12 @@
 import type { PublicReview } from "@/lib/api";
 
-// Curated placeholder reviews shown in the Builder Archive before real post-launch
-// reviews accumulate. Tester rows in the DB are intentionally NOT shown.
-//
-// SWAP LATER: when ready to show real submissions, replace the `MOCK_REVIEWS`
-// import in app/page.tsx with `await getPublicReviews()` (filtered for testers).
+// Pre-launch review rows in the DB that must never show publicly (internal
+// testers / smoke tests). Real submissions after these join the marquee live.
+export const TESTER_REVIEW_IDS = new Set<number>([1, 2, 3]);
+
+// Curated reviews that pad the Builder Archive while real post-launch reviews
+// accumulate. Real (non-tester) submissions render FIRST, then these fill out
+// the marquee.
 export const MOCK_REVIEWS: PublicReview[] = [
   {
     id: 1001,

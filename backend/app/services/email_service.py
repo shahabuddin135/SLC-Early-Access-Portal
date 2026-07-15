@@ -12,9 +12,9 @@ logger = logging.getLogger(__name__)
 _FROM = "SLC Framework <noreply@wewiselabs.com>"
 
 # Celebration mascot — used for the "access granted" email hero card.
-_FEATURED_ILLUSTRATION = "https://res.cloudinary.com/didt1ywys/image/upload/v1781002983/happy_jump_djg2ti.png"
+_FEATURED_ILLUSTRATION = "https://res.cloudinary.com/dqkt0g0he/image/upload/v1784145648/happy_jump_c3ohjk.png"
 # Mascot carrying files — used for welcome / password-reset hero cards.
-_CARRYING_ILLUSTRATION = "https://res.cloudinary.com/didt1ywys/image/upload/v1781002981/carrying_file_nmcdwo.png"
+_CARRYING_ILLUSTRATION = "https://res.cloudinary.com/dqkt0g0he/image/upload/v1784145648/carrying_file_pqavlp.png"
 
 # Brand colours
 _ORANGE = "#FF4500"

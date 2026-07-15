@@ -24,7 +24,7 @@ const VOWELS = new Set(["a", "e", "i", "o", "u"]);
 
 // Mascot carrying the code folder — the single hero illustration (all screens).
 const ILLUSTRATION =
-  "https://res.cloudinary.com/didt1ywys/image/upload/v1781002981/carrying_file_nmcdwo.png";
+  "https://res.cloudinary.com/dqkt0g0he/image/upload/v1784145648/carrying_file_pqavlp.png";
 
 const INK = "#1C150F";
 
@@ -60,23 +60,6 @@ export default function HeroWhite() {
         flexDirection: "column",
       }}
     >
-      {/* Warm glow pooling behind the mascot */}
-      <div
-        aria-hidden
-        style={{
-          position: "absolute",
-          top: "14%",
-          right: "4%",
-          width: "min(46vw, 620px)",
-          height: "min(46vw, 620px)",
-          background:
-            "radial-gradient(circle, rgba(255,120,40,0.30) 0%, rgba(255,120,40,0) 66%)",
-          filter: "blur(10px)",
-          pointerEvents: "none",
-          zIndex: 0,
-        }}
-      />
-
       {/* Hairline under the topbar */}
       <div
         aria-hidden
@@ -136,7 +119,7 @@ export default function HeroWhite() {
               whiteSpace: "nowrap",
             }}
           >
-            WeWise Labs &middot; npx @wewise/slc
+            WeWise Labs &middot; npx @wewiselabs/slc
           </span>
         </div>
 
@@ -233,8 +216,8 @@ export default function HeroWhite() {
               }}
             >
               SLC is the world&apos;s first token-efficient, spec-native language for cognition.
-              One command turns your requirements into a validated spec tree; your own AI builds from it.
-              No re-explaining. No drift. No wasted context.
+              One command scrutinizes your idea like a principal engineer, then turns it into a
+              validated spec tree; your own AI builds from it. No re-explaining. No drift. No wasted context.
             </p>
 
             {/* CTAs */}
@@ -247,7 +230,7 @@ export default function HeroWhite() {
               }}
             >
               <span className="hero-cta" style={{ opacity: 0, display: "inline-block" }}>
-                <InstallCommand command="npx @wewise/slc" />
+                <InstallCommand command="npx @wewiselabs/slc" />
               </span>
               <Link
                 href="/docs"
@@ -357,7 +340,6 @@ export default function HeroWhite() {
           max-width: min(46vw, 600px);
           height: auto;
           object-fit: contain;
-          filter: drop-shadow(0 26px 42px rgba(180,80,20,0.22));
         }
         .hero-deco { position: absolute; z-index: 2; pointer-events: none; }
         .hero-deco-spark { width: clamp(14px, 2.4vw, 26px); height: clamp(14px, 2.4vw, 26px); }

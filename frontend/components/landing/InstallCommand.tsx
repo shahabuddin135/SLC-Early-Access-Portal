@@ -4,7 +4,7 @@ import { useState } from "react";
 // Click-to-copy install command, styled like a terminal pill. Sharp edges, mono,
 // dark — reads well on both the cream hero and the dark sections.
 export default function InstallCommand({
-  command = "npx @wewise/slc",
+  command = "npx @wewiselabs/slc",
   size = "lg",
 }: {
   command?: string;

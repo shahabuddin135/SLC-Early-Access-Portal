@@ -10,7 +10,7 @@ const MANIFESTO = ["Spec first.", "Code second.", "Memory anchored.", "No drift.
 
 // Celebration mascot — the closing CTA illustration.
 const ILLUSTRATION =
-  "https://res.cloudinary.com/didt1ywys/image/upload/v1781002983/happy_jump_djg2ti.png";
+  "https://res.cloudinary.com/dqkt0g0he/image/upload/v1784145648/happy_jump_c3ohjk.png";
 
 export default function ProtocolSection() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -112,7 +112,7 @@ export default function ProtocolSection() {
             className="verdict-ctas"
             style={{ display: "flex", gap: "16px", alignItems: "center", flexWrap: "wrap", opacity: 0 }}
           >
-            <InstallCommand command="npx @wewise/slc" />
+            <InstallCommand command="npx @wewiselabs/slc" />
             <Link
               href="/docs"
               style={{
@@ -135,7 +135,6 @@ export default function ProtocolSection() {
 
         {/* ── Big mascot ── */}
         <div className="verdict-art" style={{ position: "relative", minWidth: 0, opacity: 0 }}>
-          <span className="verdict-glow" aria-hidden />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={ILLUSTRATION}
@@ -179,13 +178,6 @@ export default function ProtocolSection() {
           align-items: center;
           justify-content: center;
         }
-        .verdict-glow {
-          position: absolute;
-          inset: -8%;
-          background: radial-gradient(circle, rgba(255,80,20,0.34) 0%, rgba(255,80,20,0) 66%);
-          filter: blur(14px);
-          z-index: 0;
-        }
         .verdict-mascot {
           position: relative;
           z-index: 1;
@@ -193,7 +185,6 @@ export default function ProtocolSection() {
           max-width: clamp(280px, 40vw, 480px);
           height: auto;
           object-fit: contain;
-          filter: drop-shadow(0 28px 50px rgba(255,69,0,0.32));
         }
         @media (max-width: 900px) {
           .verdict-grid {

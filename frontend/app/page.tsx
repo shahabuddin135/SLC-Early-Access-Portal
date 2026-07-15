@@ -15,12 +15,14 @@ import ReviewsSection from "@/components/landing/ReviewsSection";
 import ComparisonSection from "@/components/landing/ComparisonSection";
 import LandingFooter from "@/components/landing/LandingFooter";
 import FlowArt, { FlowSection } from "@/components/story-scroll";
-import { MOCK_REVIEWS } from "@/lib/mock-reviews";
+import { MOCK_REVIEWS, TESTER_REVIEW_IDS } from "@/lib/mock-reviews";
+import { getPublicReviews } from "@/lib/api";
 
-export default function LandingPage() {
-  // Showing curated reviews until real post-launch reviews accumulate. To go live,
-  // swap MOCK_REVIEWS for `await getPublicReviews()` (and make this async again).
-  const reviews = MOCK_REVIEWS;
+export default async function LandingPage() {
+  // Real submissions join the marquee live (newest first, testers excluded);
+  // curated reviews pad the archive while the real ones accumulate.
+  const real = (await getPublicReviews()).filter((r) => !TESTER_REVIEW_IDS.has(r.id));
+  const reviews = [...real, ...MOCK_REVIEWS];
 
   return (
     <>
