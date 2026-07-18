@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next"
 import { Inter, JetBrains_Mono, Noto_Nastaliq_Urdu } from "next/font/google";
 import "./globals.css";
 import { PostHogProvider } from "./providers";
@@ -70,6 +71,7 @@ export default function RootLayout({
     >
       <body>
         <PostHogProvider>{children}</PostHogProvider>
+        <Analytics />
       </body>
     </html>
   );
