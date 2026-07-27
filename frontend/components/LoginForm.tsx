@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function LoginForm() {
+export default function LoginForm({ next }: { next?: string }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,7 +29,7 @@ export default function LoginForm() {
       const body = await res.json();
 
       if (res.ok) {
-        router.push("/dashboard");
+        router.push(next || "/dashboard");
       } else {
         setError(body.error ?? "Login failed.");
       }

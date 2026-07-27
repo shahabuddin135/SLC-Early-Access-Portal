@@ -4,7 +4,8 @@ import { createPortal } from "react-dom";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import type { PublicReview } from "@/lib/api";
-import { reviewByKeyAction } from "@/app/actions/review";
+import { reviewAction, reviewSessionAction, type ReviewSession } from "@/app/actions/review";
+import { capture } from "@/lib/analytics";
 
 // The archive keeper: mascot peeking in to greet the builders.
 const KEEPER =
@@ -80,8 +81,12 @@ function ReviewCard({ r }: { r: PublicReview }) {
 }
 
 // ── add-review modal ─────────────────────────────────────────────────────────
+// Reviews are filed under an account: the signed-in user is the author, so the
+// name on the record can't be typed in. The project link stays the proof of work.
+const RETURN_TO = "/?review=open#archive";
+
 function AddReviewModal({ onClose }: { onClose: () => void }) {
-  const [key, setKey] = useState("");
+  const [session, setSession] = useState<ReviewSession | null>(null);
   const [project, setProject] = useState("");
   const [text, setText] = useState("");
   const [status, setStatus] = useState<"idle" | "submitting" | "ok">("idle");
@@ -98,21 +103,32 @@ function AddReviewModal({ onClose }: { onClose: () => void }) {
     };
   }, [onClose]);
 
+  // Read the session only when the modal opens, so the landing page itself can
+  // stay statically rendered.
+  useEffect(() => {
+    let live = true;
+    reviewSessionAction()
+      .then((s) => live && setSession(s))
+      .catch(() => live && setSession({ signedIn: false }));
+    return () => {
+      live = false;
+    };
+  }, []);
+
   async function submit() {
     setError(null);
-    if (!key.trim()) return setError("Enter your download key.");
     if (!/^https?:\/\/.+\..+/.test(project.trim()))
       return setError("Enter a valid project link (https://…).");
     if (text.trim().length < 10) return setError("Your review needs at least 10 characters.");
 
     setStatus("submitting");
-    const res = await reviewByKeyAction({
-      key_value: key.trim(),
+    const res = await reviewAction({
       project_link: project.trim(),
       review_text: text.trim(),
     });
     if (res.ok) {
-      setName(res.name);
+      capture("review_submitted");
+      setName(res.name || (session?.signedIn ? session.name : ""));
       setStatus("ok");
     } else {
       setError(res.error);
@@ -120,63 +136,101 @@ function AddReviewModal({ onClose }: { onClose: () => void }) {
     }
   }
 
+  const signInPrompt = (
+    <>
+      <p className="rvm-eyebrow">Add your review</p>
+      <p className="rvm-lead">
+        Reviews are filed under your account, so the name on the record is really yours. Sign in — or
+        create an account — and your review is one form away.
+      </p>
+      <a className="rvm-submit rvm-btn-link" href={`/login?next=${encodeURIComponent(RETURN_TO)}`}>
+        Sign in
+      </a>
+      <a
+        className="rvm-ghost"
+        href={`/register?next=${encodeURIComponent(RETURN_TO)}`}
+      >
+        Create an account
+      </a>
+    </>
+  );
+
+  const verifyPrompt = (
+    <>
+      <p className="rvm-eyebrow">One step left</p>
+      <p className="rvm-lead">
+        You&apos;re signed in as {session?.signedIn ? session.name : ""}, but your email address
+        isn&apos;t verified yet. Verify it from your dashboard and the archive opens up.
+      </p>
+      <a className="rvm-submit rvm-btn-link" href="/dashboard">
+        Go to dashboard
+      </a>
+    </>
+  );
+
+  const form = (
+    <>
+      <p className="rvm-eyebrow">Add your review</p>
+      <p className="rvm-lead">
+        Filing as <span className="rvm-who">{session?.signedIn ? session.name : ""}</span>. Link the
+        project you built with SLC — that link is the record.
+      </p>
+
+      <label className="rvm-label">Project link</label>
+      <input
+        className="rvm-input"
+        placeholder="https://github.com/you/your-slc-project"
+        value={project}
+        onChange={(e) => setProject(e.target.value)}
+        autoFocus
+      />
+
+      <label className="rvm-label">Your review</label>
+      <textarea
+        className="rvm-input rvm-textarea"
+        placeholder="What did building with SLC actually feel like?"
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        rows={4}
+        maxLength={2000}
+      />
+
+      {error && <p className="rvm-error">{error}</p>}
+
+      <button className="rvm-submit" onClick={submit} disabled={status === "submitting"}>
+        {status === "submitting" ? "Filing…" : "File in archive"}
+      </button>
+    </>
+  );
+
+  let body: React.ReactNode;
+  if (status === "ok") {
+    body = (
+      <div className="rvm-done">
+        <p className="rvm-done-file">{name.toLowerCase().replace(/[^a-z0-9]+/g, "_")}.slc</p>
+        <p className="rvm-done-title">Filed. Thank you{name ? `, ${name}` : ""}.</p>
+        <p className="rvm-done-text">
+          Your review is recorded against your account and will appear in the archive as we open up
+          post-launch stories.
+        </p>
+        <button className="rvm-submit" onClick={onClose}>Done</button>
+      </div>
+    );
+  } else if (session === null) {
+    body = <p className="rvm-checking">Checking your session…</p>;
+  } else if (!session.signedIn) {
+    body = signInPrompt;
+  } else if (!session.emailVerified) {
+    body = verifyPrompt;
+  } else {
+    body = form;
+  }
+
   return (
     <div className="rvm-overlay" onClick={onClose}>
       <div className="rvm-card" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
         <button className="rvm-close" onClick={onClose} aria-label="Close">×</button>
-
-        {status === "ok" ? (
-          <div className="rvm-done">
-            <p className="rvm-done-file">{name.toLowerCase().replace(/[^a-z0-9]+/g, "_")}.slc</p>
-            <p className="rvm-done-title">Filed. Thank you, {name}.</p>
-            <p className="rvm-done-text">
-              Your review is recorded against your key and will appear in the archive as we open up
-              post-launch stories.
-            </p>
-            <button className="rvm-submit" onClick={onClose}>Done</button>
-          </div>
-        ) : (
-          <>
-            <p className="rvm-eyebrow">Add your review</p>
-            <p className="rvm-lead">
-              Your download key proves you actually used SLC. Your name is pulled from it, so no
-              login is needed.
-            </p>
-
-            <label className="rvm-label">Download key</label>
-            <input
-              className="rvm-input rvm-mono"
-              placeholder="XXXX-XXXX-XXXX-XXXX"
-              value={key}
-              onChange={(e) => setKey(e.target.value)}
-              autoFocus
-            />
-
-            <label className="rvm-label">Project link</label>
-            <input
-              className="rvm-input"
-              placeholder="https://github.com/you/your-slc-project"
-              value={project}
-              onChange={(e) => setProject(e.target.value)}
-            />
-
-            <label className="rvm-label">Your review</label>
-            <textarea
-              className="rvm-input rvm-textarea"
-              placeholder="What did building with SLC actually feel like?"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              rows={4}
-              maxLength={2000}
-            />
-
-            {error && <p className="rvm-error">{error}</p>}
-
-            <button className="rvm-submit" onClick={submit} disabled={status === "submitting"}>
-              {status === "submitting" ? "Filing…" : "File in archive"}
-            </button>
-          </>
-        )}
+        {body}
       </div>
 
       <style>{`
@@ -190,12 +244,21 @@ function AddReviewModal({ onClose }: { onClose: () => void }) {
         .rvm-input { width: 100%; background: #141414; border: 1px solid #2A2A2A; color: #F0EEE9; padding: 11px 13px; font-family: var(--font-display); font-size: 0.92rem; margin-bottom: 16px; transition: border-color 0.15s; }
         .rvm-input:focus { outline: none; border-color: #FF4500; }
         .rvm-input::placeholder { color: #514E4A; }
-        .rvm-mono { font-family: var(--font-mono); letter-spacing: 0.08em; }
         .rvm-textarea { resize: vertical; min-height: 96px; line-height: 1.5; }
+        .rvm-who { color: #F0EEE9; font-weight: 500; }
+        .rvm-checking { font-family: var(--font-mono); font-size: 0.74rem; letter-spacing: 0.1em; text-transform: uppercase; color: #6E6B66; margin: 8px 0; }
         .rvm-error { font-family: var(--font-display); font-size: 0.82rem; color: #FF6B4A; margin: 0 0 14px; }
         .rvm-submit { width: 100%; background: #FF4500; color: #fff; border: none; padding: 13px; font-family: var(--font-sans); font-weight: 700; font-size: 0.82rem; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: opacity 0.15s; }
         .rvm-submit:hover:not(:disabled) { opacity: 0.9; }
         .rvm-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+        .rvm-btn-link { display: block; text-align: center; text-decoration: none; }
+        .rvm-ghost {
+          display: block; text-align: center; text-decoration: none; margin-top: 12px;
+          padding: 12px; border: 1px solid #2A2A2A; color: #9A9690;
+          font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase;
+          transition: border-color 0.15s, color 0.15s;
+        }
+        .rvm-ghost:hover { border-color: #FF4500; color: #FF4500; }
         .rvm-done { text-align: center; }
         .rvm-done-file { font-family: var(--font-mono); font-size: 0.72rem; color: #FF7A45; margin: 0 0 14px; }
         .rvm-done-title { font-family: var(--font-display); font-weight: 200; font-size: 1.5rem; letter-spacing: -0.02em; color: #F0EEE9; margin: 0 0 12px; }
@@ -216,6 +279,16 @@ export default function ReviewsSection({ reviews }: { reviews: PublicReview[] })
 
   const rowA = fillRow(reviews, 7);
   const rowB = fillRow([...reviews].reverse(), 7);
+
+  // Coming back from sign-in (/?review=open#archive) reopens the modal where the
+  // user left off. Read from location rather than useSearchParams so the landing
+  // page doesn't need a Suspense bail-out.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("review") !== "open") return;
+    setModalOpen(true);
+    const url = window.location.pathname + window.location.hash;
+    window.history.replaceState(null, "", url);
+  }, []);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);

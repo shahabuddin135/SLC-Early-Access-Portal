@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function RegisterForm() {
+export default function RegisterForm({ next }: { next?: string }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,7 +32,10 @@ export default function RegisterForm() {
 
       if (res.ok) {
         setSuccess(true);
-        setTimeout(() => router.push("/login?registered=1"), 1200);
+        const target = next
+          ? `/login?registered=1&next=${encodeURIComponent(next)}`
+          : "/login?registered=1";
+        setTimeout(() => router.push(target), 1200);
       } else {
         setError(body.error ?? "Registration failed.");
       }

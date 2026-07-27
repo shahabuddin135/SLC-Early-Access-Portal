@@ -47,7 +47,8 @@ export default async function DashboardPage() {
           accessKey={data.access_key}
         />
 
-        {data.has_downloaded && (
+        {/* Reviews are account-based: a verified address is the only gate. */}
+        {data.email_verified && (
           <div className="fade-in" style={{ marginTop: 24 }}>
             <ReviewForm />
           </div>

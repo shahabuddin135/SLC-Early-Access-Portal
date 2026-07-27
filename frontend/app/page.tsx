@@ -57,7 +57,7 @@ export default async function LandingPage() {
           </FlowSection>
         </FlowArt>
 
-        {/* Builder Archive — real reviews from key-holders who shipped with SLC */}
+        {/* Builder Archive — real reviews filed by account holders who shipped with SLC */}
         <ReviewsSection reviews={reviews} />
 
         {/* Standalone: complex scroll animations */}

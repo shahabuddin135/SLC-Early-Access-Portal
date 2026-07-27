@@ -484,36 +484,12 @@ export async function getPublicReviews(): Promise<PublicReview[]> {
   }
 }
 
-// No-login submission — the download key identifies the author. Powers the
-// "add review" flow in the Builder Archive.
-export async function submitReviewByKey(data: {
-  key_value: string;
-  project_link: string;
-  review_text: string;
-}): Promise<{ ok: true; name: string } | { ok: false; error: string }> {
-  try {
-    const res = await fetch(`${BACKEND_URL}/api/v1/reviews/by-key`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-      cache: "no-store",
-    });
-    const body = await res.json();
-    if (res.ok) return { ok: true, name: body.name };
-    const message =
-      typeof body?.detail === "string"
-        ? body.detail
-        : "Could not submit your review. Please check your details and try again.";
-    return { ok: false, error: message };
-  } catch {
-    return { ok: false, error: "Network error. Please try again." };
-  }
-}
-
+// Signed-in submission — the account is the author, so the name on the review
+// comes from the session, never from the form.
 export async function submitReview(
   token: string,
   data: { project_link: string; review_text: string }
-): Promise<{ ok: true } | { ok: false; error: string }> {
+): Promise<{ ok: true; name: string } | { ok: false; error: string }> {
   try {
     const res = await fetch(`${BACKEND_URL}/api/v1/review`, {
       method: "POST",
@@ -525,13 +501,15 @@ export async function submitReview(
       cache: "no-store",
     });
 
-    if (res.ok) return { ok: true };
+    const body = await res.json().catch(() => null);
+    if (res.ok) return { ok: true, name: body?.name ?? "" };
 
-    const body = await res.json();
     const message =
-      res.status === 403
-        ? "Please download the SLC files first."
-        : body?.detail ?? "Submission failed. Please try again.";
+      res.status === 401
+        ? "Your session expired. Please sign in again."
+        : typeof body?.detail === "string"
+          ? body.detail
+          : "Submission failed. Please try again.";
 
     return { ok: false, error: message };
   } catch {

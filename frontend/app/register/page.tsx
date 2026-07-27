@@ -1,7 +1,19 @@
 import Link from "next/link";
 import RegisterForm from "@/components/RegisterForm";
 
-export default function RegisterPage() {
+interface RegisterPageProps {
+  searchParams: Promise<{ next?: string }>;
+}
+
+// Only same-origin paths survive the round-trip through registration.
+function safeNext(next?: string): string | undefined {
+  return next && next.startsWith("/") && !next.startsWith("//") ? next : undefined;
+}
+
+export default async function RegisterPage({ searchParams }: RegisterPageProps) {
+  const params = await searchParams;
+  const next = safeNext(params.next);
+
   return (
     <div className="page-center">
       <div className="container">
@@ -13,13 +25,13 @@ export default function RegisterPage() {
             </p>
           </div>
 
-          <RegisterForm />
+          <RegisterForm next={next} />
 
           <div className="divider" />
 
           <p style={{ textAlign: "center", fontSize: "0.875rem" }}>
             Already have an account?{" "}
-            <Link href="/login">Log in</Link>
+            <Link href={next ? `/login?next=${encodeURIComponent(next)}` : "/login"}>Log in</Link>
           </p>
         </div>
       </div>

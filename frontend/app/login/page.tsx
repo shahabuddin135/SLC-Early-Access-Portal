@@ -2,13 +2,20 @@ import Link from "next/link";
 import LoginForm from "@/components/LoginForm";
 
 interface LoginPageProps {
-  searchParams: Promise<{ registered?: string; reset?: string }>;
+  searchParams: Promise<{ registered?: string; reset?: string; next?: string }>;
+}
+
+// Only same-origin paths may be followed after login — an absolute URL here
+// would turn the login page into an open redirect.
+function safeNext(next?: string): string | undefined {
+  return next && next.startsWith("/") && !next.startsWith("//") ? next : undefined;
 }
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
   const justRegistered = params.registered === "1";
   const passwordReset = params.reset === "1";
+  const next = safeNext(params.next);
 
   return (
     <div className="page-center">
@@ -33,13 +40,15 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             </p>
           )}
 
-          <LoginForm />
+          <LoginForm next={next} />
 
           <div className="divider" />
 
           <p style={{ textAlign: "center", fontSize: "0.875rem" }}>
             Don&apos;t have an account?{" "}
-            <Link href="/register">Register</Link>
+            <Link href={next ? `/register?next=${encodeURIComponent(next)}` : "/register"}>
+              Register
+            </Link>
           </p>
         </div>
       </div>
