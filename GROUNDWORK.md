@@ -14,6 +14,10 @@ SLC is a calm, guided terminal. It reads your requirements, asks only what it ge
 doesn't know, and writes a complete, validated **spec tree** — using **your** AI. It writes
 **specs, never application code**. Then you point any agent at those specs and build.
 
+Built on [Ink](https://github.com/vadimdemedes/ink) (React for terminals) — the mission map, every
+prompt, and every report (`doctor`, `estimate`, `db`, `audit`) are real components, not string
+concatenation. **Requires Node ≥22.**
+
 ---
 
 ## 1. Run it
@@ -22,8 +26,10 @@ doesn't know, and writes a complete, validated **spec tree** — using **your** 
 npx @wewiselabs/slc      # or:  pnpm dlx @wewiselabs/slc   ·   bunx @wewiselabs/slc
 ```
 
-No global install needed. Run it inside the project folder that has (or will have) a
-`requirement.md`.
+No global install needed. Run it inside the project folder that has (or will have) your
+requirement. It doesn't have to be named `requirement.md` or follow any particular structure —
+SLC looks for common names first, scans the folder and judges by content if it doesn't find one,
+and `slc --file <path>` points at anything directly. See §7.11.
 
 Prefer the bare `slc` command? `npm install -g @wewiselabs/slc` once, then `slc`, `slc doctor`,
 `slc --help` work anywhere. (With npx, always use the full scoped name — `npx slc` unscoped is a
@@ -167,15 +173,24 @@ One question sets the lens — **the posture**: *hobby* (simplest, cheapest, no 
 nagging), *growth* (flag scale traps + cost hotspots), or *business* (security, costs, and
 billing flows are first-class).
 
-The result is a **scrutiny report** (blockers → warnings → notes, each with a one-line fix), at
-most six **decisions worth making** — every one with a suggested answer you can accept by
-pressing Enter — and a **repaired requirement**. You choose: apply the repairs (your original is
-backed up to `.slc/requirement.backup.md`), keep your text as-is, or go edit it yourself and get
-re-checked. Skipped decisions become **explicit assumptions** that end up in `spec/MEMORY.md` —
-never silent inventions. The full report is saved to `.slc/scrutiny.json`.
+The result is a **scrutiny report** (blockers → warnings → notes, each with a one-line fix) and
+every **decision genuinely worth making** — no artificial cap; a real gap SLC doesn't ask about
+becomes a silent wrong guess later, which is worse than one more question. Each one ships a
+suggested answer you can accept by pressing Enter.
 
-**No requirement.md at all?** Type the idea straight into the terminal — scrutiny reviews it and
-drafts the requirement file for you.
+**Scrutiny reviews; it does not rewrite.** If your requirement already exists as a file, SLC treats
+it as *yours* — your structure, your wording, your section order, even if it's nothing like SLC's
+own template (it might be better). A brief that's already solid is left **completely untouched** —
+no menu, no "repaired" copy, nothing to confirm; SLC says so and moves straight on. When there
+genuinely are fixes, SLC shows you a **diff** (lines added / removed) before anything is written, so
+"apply" never means "trust me" — only the flagged spots change, plus one appended
+`## Assumptions (recorded by SLC)` section if anything was left undecided. Your original is always
+backed up to `.slc/requirement.backup.md` before any real change lands. The full report is saved to
+`.slc/scrutiny.json`.
+
+**No requirement file at all?** Type the idea straight into the terminal — scrutiny reviews it and
+drafts a requirement file for you (there's no existing format to preserve, so this is the one case
+where SLC picks the structure).
 
 ## The harness (the mission map)
 
@@ -246,7 +261,12 @@ update status). **SLC decides what to build and in what order; your agent writes
 
 | Command | What it does |
 |---|---|
-| `slc` | The guided generator (the flow above). |
+| `slc` | The guided generator (the flow above). Finds your requirement automatically. |
+| `slc --file <path>` | Same, but reads the requirement from an exact path — any name, any format. |
+| `slc feature "<desc>"` | Add one feature to an existing `spec/` tree without regenerating it. See 7.12. |
+| `slc estimate` | Token/cost report for an existing `spec/` tree — measured + derived + estimated. See 7.14. |
+| `slc db` | Data model view — entities, fields, inferred relationships. No LLM call. See 7.16. |
+| `slc audit` | Security/architecture review of the generated specs — report only. See 7.17. |
 | `slc doctor` | Validate an existing `spec/` tree. Exit code `1` on errors — CI-friendly. |
 | `slc --help` | This help. |
 | `slc --version` | Version. |
@@ -281,16 +301,23 @@ spec/
 - **Crash mid-save?** State files are written atomically (temp + rename) — a crash can't leave a
   half-written state behind. If an old corrupt state is found, it's moved aside and reported,
   never silently treated as "no state".
+- **Fresh clone of an already-built project?** `.slc/state.json` is gitignored (it can hold an API
+  key), so a clone has none. Instead of treating that like a brand-new project, SLC samples evidence
+  off the spec tree itself — which sides exist, task status counts, a leftover scrutiny report — and
+  offers **Resume** at the inferred phase, reasons shown, never silent. See scenario 7.15.
 - **Merged branches?** `slc doctor` catches what merges break: leftover conflict markers,
   duplicate block names/ids, ambiguous references, `ARCH.md` + `arch/` coexisting, orphaned task
   files, stale counts. See scenario 7.10.
 - **Provider hiccup?** API calls **retry with backoff** before failing.
-- **Secrets in requirement.md?** SLC scans first and **warns before sending** anything to your AI.
+- **Requirement named anything, in any format?** SLC finds it — common names first, then a
+  content-scored folder scan, then `--file`. See scenario 7.11.
+- **Secrets in your requirement?** SLC scans first and **warns before sending** anything to your AI.
 - **Malformed/invalid specs?** `slc doctor` runs automatically; in API mode it offers a one-tap
   **auto-fix** that re-prompts your model to repair only the broken files.
-- **Thin requirement?** Scrutiny asks only the decisions that matter, each with a suggested
-  answer; whatever you skip is passed to generation as an **explicit assumption** for
-  `MEMORY.md` rather than invented.
+- **Requirement already complete?** Scrutiny says so and **changes nothing** — no menu, no
+  reflow into SLC's template. It only ever asks about, or edits, genuine gaps.
+- **Thin requirement?** Scrutiny asks about every decision that matters — no cap; whatever you
+  skip is passed to generation as an **explicit assumption** for `MEMORY.md` rather than invented.
 - **Unfilled template?** Leftover `<placeholders>` are detected and called out before any LLM
   call is spent on them.
 - **No LLM reachable during scrutiny?** SLC falls back to the basic gap checklist and still
@@ -426,6 +453,122 @@ When two branches disagree on a task's `status`, take the more-advanced one (`do
 `in-progress` beats `todo`). Counters like `total_tasks` are derived — the task list is the truth;
 doctor tells you when a count went stale.
 
+### 7.11 "My requirement isn't named requirement.md, or doesn't look like SLC's template"
+
+Neither matters. Discovery is layered, and every layer is content-based, never format-based:
+
+1. **Common names first** — `requirement.md`, `requirements.md`, `PRD.md` (any case). Instant,
+   silent, zero setup.
+2. **Not found? SLC scans the folder** — any root-level `.md`/`.txt` file — and scores each one by
+   whether it actually covers the essentials (goal, users, stack, auth, data, non-goals,
+   constraints — checked by keyword, not by header text, so *any* structure counts). One clear
+   winner is used automatically (SLC tells you which, and why); a few plausible files get you a
+   quick picker; nothing plausible falls through to describing the idea or scaffolding a template —
+   it never just gives up.
+3. **Know exactly which file? Skip discovery entirely:** `slc --file path/to/whatever.md`.
+
+And once found, its **format is never judged**. Scrutiny checks whether the content covers the
+essentials — never whether it's shaped like SLC's own template. See "Scrutiny reviews; it does not
+rewrite" above: a complete brief in your own structure is left exactly as you wrote it.
+
+### 7.12 "The project is already built — I just want to add a feature"
+
+Don't run `slc` again — that's for a new project or a deliberate full regeneration. Use:
+
+```bash
+slc feature "Add a due-date field to todos, shown on the list and editable per item"
+```
+
+(No description on the command line? SLC asks for one.)
+
+This is a **narrow, additive** operation, not a re-run of the guided flow:
+
+- It reads what already exists — `CONTEXT.md`'s non-goals, `CONSTRAINTS.md`'s hard rules, `MEMORY.md`'s
+  frozen decisions, the current backend/frontend `CONTRACT`, and the current `task_index.md` — and
+  checks the request against them. A real conflict comes back as a flag (severity `block` for
+  anything that truly contradicts something frozen) instead of silently generating around it.
+- New tasks always land in a **brand-new phase number**, never a renumbered slot in an existing one
+  — so ids can't collide with what's already there, by construction, not by careful counting.
+- `CONTEXT.md`, `CONSTRAINTS.md`, and `SECURITY.md` are never touched. If the feature genuinely needs
+  one of them to change, that's a full `slc` run, not this command — SLC says so instead of guessing.
+- You see the exact file list before anything is written, and `slc doctor` runs immediately after.
+
+`slc doctor` runs first too — adding to an already-broken tree just compounds the breakage, so SLC
+warns and asks before building on top of existing errors.
+
+(No description on hand and would rather not type one? Point SLC at a file instead — see 7.13.)
+
+### 7.13 "I'd rather attach a file than type into the terminal"
+
+Anywhere SLC asks for free text longer than a sentence, there's a file option next to it:
+
+- **No requirement found at all** — the "How do you want to start?" menu includes *"Point me at a
+  file"*: give it a path (any name, any format, anywhere on disk) and it's read exactly like
+  `slc --file` would, format respected, nothing rewritten.
+- **`slc feature`'s description prompt** — choose *"Attach a file instead"* and give it a path; SLC
+  reads it as plain text and uses it as the feature request. Useful for anything long enough that
+  retyping it into a terminal line is awkward — a bug report, a design note, a paragraph you already
+  wrote somewhere else.
+
+A bad path doesn't abort the command — SLC says so and asks again, same as everywhere else it reads
+a file you named.
+
+### 7.14 "What is this actually saving me?"
+
+```bash
+slc estimate
+```
+
+A token/cost report for the spec tree that's already there. It's split into three kinds of number,
+on purpose — this tool avoids confident-sounding numbers it can't back up, and the report is no
+exception:
+
+- **MEASURED** — file count, size, a rough token estimate (bytes ÷ 4 — labelled as rough, not an
+  exact tokenizer count) — read straight off disk.
+- **DERIVED** — task count and total agent-time estimate, straight from the `total_tasks` /
+  `total_estimate` your specs already carry. Not a new guess, just surfaced.
+- **ESTIMATED** — a token-savings range for spec-driven vs. no spec tree, with the assumption printed
+  next to it (an agent without specs re-derives context every task; the range is what that
+  re-orientation plausibly costs). It's shown as a range, never a single confident number.
+
+No dollar figure is ever built in — model pricing changes too often to bake into a CLI without it
+going stale and misleading you. Give it a `$/million-token` rate when it asks (Enter to skip) and
+it'll convert the range for you; skip it and you get tokens only.
+
+### 7.15 "I cloned an already-built project — will it think it's brand new?"
+
+No. `.slc/state.json` is gitignored (it can hold an API key), so a fresh clone never has it — but
+SLC doesn't treat that as "start over." It samples evidence straight off the spec tree: which of
+`backend_specs/`/`frontend_specs/` exist, task `status:` counts in each `task_index.md`, a leftover
+`.slc/scrutiny.json`. Whatever it infers is offered as **Resume**, labelled *"inferred, not saved
+state"* with the reasons printed above the menu — never silent, and you can always pick Regenerate
+instead if the inference looks wrong.
+
+### 7.16 "What does the data model actually look like?"
+
+```bash
+slc db
+```
+
+Reads every `data_model:` entry under `backend_specs/ARCH.md` (or `arch/*.md` if split) and prints
+entities, fields, and types, plus relationships it can infer from `*_id`-style field names (e.g.
+`Session.user_id -> User.id`). Pure, instant, no LLM call — and it says so plainly when nothing
+matches the documented shape (SLC.md §5.5) rather than guessing at a different one.
+
+### 7.17 "Is there anything risky in the specs themselves?"
+
+```bash
+slc audit
+```
+
+Scrutiny reviews your *requirement* before any spec exists. Doctor checks the generated specs are
+*structurally* valid SLC. Neither one reads the actual architecture for security or design risk —
+`slc audit` is that missing pass: an LLM review of ARCH + CONTRACT + SECURITY + CONSTRAINTS for
+authn/authz gaps, unprotected sensitive fields, boundary violations the ARCH itself declares and
+then contradicts, and constraint conflicts. Same flag shape as scrutiny (`block`/`warn`/`note`, each
+with a one-line fix). It's **read-only** — a report, not an auto-fix — because a wrong security "fix"
+is worse than a wrong structural one; address findings via `slc feature` or by editing the specs.
+
 ---
 
 ## 8. Troubleshooting
@@ -440,6 +583,7 @@ doctor tells you when a count went stale.
 | `npx slc` installs something weird | Unscoped `slc` is a **different, unrelated package** on npm | Always the full name: `npx @wewiselabs/slc` |
 | `slc is interactive — run it in a real terminal` | Output is piped, or the shell has no TTY (some CI shells, Git Bash via MinTTY) | Use Windows Terminal / PowerShell / a normal terminal; `doctor --json` and `bridge` still work piped |
 | Banner/art looks garbled | Legacy console without unicode | `SLC_ASCII=1 slc` (plain-ASCII art) · `SLC_ANIM=0` disables the intro animation |
+| Install fails / prompts hang oddly on an old Node | SLC's terminal UI runs on Ink, which needs **Node ≥22** | `node --version`; upgrade if older (Node 18 is past its own end-of-life anyway) |
 
 ### During a run
 
